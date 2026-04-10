@@ -2,12 +2,14 @@ import React from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import ProjectCard from "./ProjectCards";
 import Particle from "../Particle";
-import unfugly from "../../Assets/Projects/Unfugly.png";
-import isSpam from "../../Assets/Projects/isSpam.png";
-import phishingSentinel from "../../Assets/Projects/PhishingSentinel.png"; 
-import bitsOfCode from "../../Assets/Projects/blog.png";
+import useProjects from "../../hooks/useProjects";
+import Preloader from "../Pre";
 
 function Projects() {
+  const { projects, loading, error } = useProjects();
+
+  if (loading) return <Preloader load={true} />;
+
   return (
     <Container fluid className="project-section">
       <Particle />
@@ -18,61 +20,33 @@ function Projects() {
         <p style={{ color: "white" }}>
           Here are a few projects I've worked on recently.
         </p>
+        {error && (
+          <p className="text-danger text-center">
+            Failed to load projects. Check console for details.
+          </p>
+        )}
         <Row style={{ justifyContent: "center", paddingBottom: "10px" }}>
-          <Col md={4} className="project-card">
-            <ProjectCard
-              imgPath={unfugly}
-              isBlog={false}
-              title="Unfugly"
-              description="Your academics displayed in a much more visually appealing way."
-              ghLink="https://github.com/garv767/Unfugly"
-              demoLink="https://chromewebstore.google.com/detail/lfjlfkbcnoioefacgcjanjdiodphnoce?utm_source=item-share-cb"
-            />
-          </Col>
-
-          <Col md={4} className="project-card">
-            <ProjectCard
-              imgPath={isSpam}
-              isBlog={false}
-              title="!isSpam"
-              description="An zero friction extension to classify mails as spam or ham using a custom ml model."
-              ghLink="https://github.com/garv767/-isSpam"
-              demoLink="https://chromewebstore.google.com/detail/giioaghhfkefecelfjjfldaagofjmfgg?utm_source=item-share-cb"
-            />
-          </Col>
-
-          <Col md={4} className="project-card">
-            <ProjectCard
-              imgPath={phishingSentinel}
-              isBlog={false}
-              title="Phishing Sentinel"
-              description="An zero friction extension to classify mails as spam or ham using a custom ml model."
-              ghLink="https://github.com/Garv767/Phishing-Sentinel"
-              demoLink=""
-            />
-          </Col>
-
-          <Col md={4} className="project-card">
-            <ProjectCard
-              imgPath={bitsOfCode}
-              isBlog={false}
-              title="Crime Record Analysis"
-              description="The Crime Record & Pattern Analysis Database System provides a centralized relational database that enables efficient record management and advanced analytical querying."
-              ghLink="https://github.com/Garv767/Crime-Record-Analysis"
-              demoLink=""
-            />
-          </Col>
-
-          <Col md={4} className="project-card">
-            <ProjectCard
-              imgPath={bitsOfCode}
-              isBlog={false}
-              title="Health Tracker"
-              description="A modern full‑stack health tracking application."
-              ghLink="https://github.com/Garv767/health-tracker"
-              demoLink=""
-            />
-          </Col>
+          {projects.map((project) => (
+            <Col md={4} className="project-card" key={project.id}>
+              <ProjectCard
+                imgPath={project.imgPath}
+                isBlog={false}
+                title={project.title}
+                description={project.description}
+                ghLink={project.ghLink}
+                demoLink={project.demoLink}
+                stars={project.stars}
+                forks={project.forks}
+                language={project.language}
+              />
+            </Col>
+          ))}
+          {projects.length === 0 && !loading && !error && (
+            <p className="text-center mt-5" style={{ color: "gray" }}>
+              No projects featured yet. Tag a GitHub repo with the{" "}
+              <strong>'portfolio'</strong> topic or enable one in the Admin Panel!
+            </p>
+          )}
         </Row>
       </Container>
     </Container>
