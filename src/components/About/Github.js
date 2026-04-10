@@ -18,8 +18,11 @@ function Github() {
         username="garv767"
         blockSize={30}
         blockMargin={10}
-        color="#c084f5"
         fontSize={20}
+        theme={{
+          dark: ["#161b22", "#7c3aed", "#9333ea", "#a855f7", "#c084f5"],
+        }}
+        colorScheme="dark"
       />
     </Row>
   );

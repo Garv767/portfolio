@@ -2,7 +2,6 @@ import React from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import ProjectCard from "./ProjectCards";
 import Particle from "../Particle";
-import editor from "../../Assets/Projects/codeEditor.png";
 import unfugly from "../../Assets/Projects/Unfugly.png";
 import isSpam from "../../Assets/Projects/isSpam.png";
 import phishingSentinel from "../../Assets/Projects/PhishingSentinel.png"; 
