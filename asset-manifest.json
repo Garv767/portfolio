@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/portfolio/static/css/main.b14fb5f4.css",
-    "main.js": "/portfolio/static/js/main.27394735.js",
+    "main.js": "/portfolio/static/js/main.c36c6205.js",
     "static/js/453.ace21015.chunk.js": "/portfolio/static/js/453.ace21015.chunk.js",
     "static/media/GARV_RAHUT_resume.pdf": "/portfolio/static/media/GARV_RAHUT_resume.44b9dfcf44683449ba95.pdf",
     "static/media/home-main.svg": "/portfolio/static/media/home-main.541f8179af8209ce03ccf2178fe62dbf.svg",
@@ -20,9 +20,9 @@
     "static/media/Python.svg": "/portfolio/static/media/Python.9daed22c470296a63e19d0d509a1828b.svg",
     "static/media/React.svg": "/portfolio/static/media/React.fa17b44468fe3c157fc20898567de2b4.svg",
     "static/media/Kafka.svg": "/portfolio/static/media/Kafka.20c66d87a33f23a9ae9a4551676228e6.svg",
+    "index.html": "/portfolio/index.html",
     "static/media/pre.svg": "/portfolio/static/media/pre.d4812f51c8c80976eaab.svg",
     "static/media/Redis.svg": "/portfolio/static/media/Redis.ca3be4d5c06fdc721e2c078c75dd59f6.svg",
-    "index.html": "/portfolio/index.html",
     "static/media/Java.svg": "/portfolio/static/media/Java.980d8e77e92511acfefbf2dfdf4336e1.svg",
     "static/media/Node.svg": "/portfolio/static/media/Node.4ccf66deab4cce38fa6a744e962daa9f.svg",
     "static/media/Redux.svg": "/portfolio/static/media/Redux.e3c7fe5a7438fc995059e630a167bc96.svg",
@@ -35,11 +35,11 @@
     "static/media/Haskell.svg": "/portfolio/static/media/Haskell.084122e02bec646ad186861642137932.svg",
     "static/media/Firebase.svg": "/portfolio/static/media/Firebase.de3da3a4068963dd30fc0f885f170428.svg",
     "main.b14fb5f4.css.map": "/portfolio/static/css/main.b14fb5f4.css.map",
-    "main.27394735.js.map": "/portfolio/static/js/main.27394735.js.map",
+    "main.c36c6205.js.map": "/portfolio/static/js/main.c36c6205.js.map",
     "453.ace21015.chunk.js.map": "/portfolio/static/js/453.ace21015.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.b14fb5f4.css",
-    "static/js/main.27394735.js"
+    "static/js/main.c36c6205.js"
   ]
 }
