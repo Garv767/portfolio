@@ -19,6 +19,7 @@ export const supabase = supabaseUrl
       }),
       auth: { 
         onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
-        signInWithPassword: () => Promise.resolve({ data: {}, error: { message: "Supabase keys are missing in this environment. Check your GitHub Secrets." } })
+        signInWithPassword: () => Promise.resolve({ data: {}, error: { message: "Supabase keys are missing in this environment. Check your GitHub Secrets." } }),
+        signOut: () => Promise.resolve({ error: null })
       }
     };
