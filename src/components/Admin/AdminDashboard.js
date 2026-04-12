@@ -192,6 +192,7 @@ function AdminDashboard() {
   };
 
   const handleLogout = async () => {
+    console.log("Logging out...");
     await supabase.auth.signOut();
     navigate("/login");
   };
@@ -271,7 +272,14 @@ function AdminDashboard() {
           <h1 className="project-heading">
             Project <strong className="purple">Management </strong>
           </h1>
-          <Button variant="outline-danger" onClick={handleLogout}>
+          <Button 
+            id="logout-button"
+            variant="outline-danger" 
+            onClick={() => {
+              console.log("Logout button component clicked");
+              handleLogout();
+            }}
+          >
             <AiOutlineLogout /> Logout
           </Button>
         </div>
