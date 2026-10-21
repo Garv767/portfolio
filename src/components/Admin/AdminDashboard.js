@@ -5,8 +5,9 @@ import { supabase } from "../../utils/supabaseClient";
 import axios from "axios";
 import Particle from "../Particle";
 import { CgWebsite } from "react-icons/cg";
-import { AiOutlineEye, AiOutlineEyeInvisible, AiOutlineSave, AiOutlineLogout, AiOutlineCheck, AiOutlineDown, AiOutlineRight } from "react-icons/ai";
+import { AiOutlineEye, AiOutlineEyeInvisible, AiOutlineSave, AiOutlineLogout, AiOutlineCheck, AiOutlineDown, AiOutlineRight, AiOutlineThunderbolt, AiOutlineAppstore } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
+import ResumeStudio from "../ResumeBuilder/ResumeStudio";
 
 const GITHUB_USERNAME = "garv767";
 
@@ -23,6 +24,7 @@ const DragHandleIcon = () => (
 );
 
 function AdminDashboard() {
+  const [activeTab, setActiveTab] = useState("resume_studio"); // 'resume_studio' | 'projects'
   const [repos, setRepos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedRepos, setExpandedRepos] = useState({});
@@ -264,17 +266,95 @@ function AdminDashboard() {
     border: `1px solid ${hasOverride ? "rgba(192,132,245,0.4)" : "rgba(255,255,255,0.15)"}`,
   });
 
+  if (activeTab === "resume_studio") {
+    return (
+      <div style={{ paddingTop: "75px" }}>
+        <div style={{
+          background: "rgba(17, 10, 26, 0.98)",
+          borderBottom: "1px solid rgba(192, 132, 245, 0.25)",
+          padding: "8px 20px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center"
+        }}>
+          <div className="d-flex align-items-center gap-2">
+            <Button
+              size="sm"
+              variant="primary"
+              onClick={() => setActiveTab("resume_studio")}
+              style={{
+                background: "linear-gradient(135deg, #8a2be2 0%, #4a00e0 100%)",
+                border: "none",
+                fontWeight: "600",
+                fontSize: "0.82rem",
+              }}
+            >
+              <AiOutlineThunderbolt /> AI Resume Studio (Overleaf LaTeX)
+            </Button>
+            <Button
+              size="sm"
+              variant="outline-secondary"
+              onClick={() => setActiveTab("projects")}
+              style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.7)" }}
+            >
+              <AiOutlineAppstore /> Projects Management
+            </Button>
+          </div>
+
+          <Button
+            size="sm"
+            id="logout-button"
+            variant="outline-danger"
+            onClick={handleLogout}
+            style={{ fontSize: "0.8rem" }}
+          >
+            <AiOutlineLogout /> Logout
+          </Button>
+        </div>
+
+        <ResumeStudio onBackToDashboard={() => setActiveTab("projects")} />
+      </div>
+    );
+  }
+
   return (
     <Container fluid className="about-section" style={{ paddingTop: "100px", paddingBottom: "60px" }}>
       <Particle />
       <Container>
-        <div className="d-flex justify-content-between align-items-center mb-4">
-          <h1 className="project-heading">
-            Project <strong className="purple">Management </strong>
-          </h1>
+        {/* Top Tab Switcher in Projects View */}
+        <div className="d-flex justify-content-between align-items-center mb-4 pb-2" style={{ borderBottom: "1px solid rgba(192, 132, 245, 0.2)" }}>
+          <div className="d-flex align-items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline-primary"
+              onClick={() => setActiveTab("resume_studio")}
+              style={{
+                borderColor: "rgba(192,132,245,0.4)",
+                color: "#c084f5",
+                fontWeight: "600",
+                fontSize: "0.85rem",
+              }}
+            >
+              <AiOutlineThunderbolt /> Switch to AI Resume Studio
+            </Button>
+            <Button
+              size="sm"
+              variant="primary"
+              style={{
+                background: "#623686",
+                borderColor: "#623686",
+                fontWeight: "600",
+                fontSize: "0.85rem",
+              }}
+            >
+              <AiOutlineAppstore /> Projects Management
+            </Button>
+          </div>
+
           <Button 
             id="logout-button"
             variant="outline-danger" 
+            size="sm"
             onClick={() => {
               console.log("Logout button component clicked");
               handleLogout();
@@ -282,6 +362,12 @@ function AdminDashboard() {
           >
             <AiOutlineLogout /> Logout
           </Button>
+        </div>
+
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <h1 className="project-heading" style={{ margin: 0 }}>
+            Project <strong className="purple">Management </strong>
+          </h1>
         </div>
         <p style={{ color: "rgba(255,255,255,0.5)", marginBottom: "20px" }}>
           {repos.length} repositories found. Drag to reorder. Yellow border = unsaved changes.

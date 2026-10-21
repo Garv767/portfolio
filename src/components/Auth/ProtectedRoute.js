@@ -25,8 +25,8 @@ const ProtectedRoute = ({ children }) => {
     return <Preloader load={true} />;
   }
 
-  // Not logged in — redirect to login
-  if (!session) {
+  // Not logged in (in production) — redirect to login
+  if (!session && process.env.NODE_ENV === "production") {
     return <Navigate to="/login" replace />;
   }
 
