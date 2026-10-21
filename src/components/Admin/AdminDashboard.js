@@ -191,6 +191,8 @@ function AdminDashboard() {
       await axios.post("/api/auth/logout");
     } catch (e) {}
     if (typeof window !== "undefined") {
+      localStorage.removeItem("neon_auth_token");
+      localStorage.removeItem("neon_auth_user");
       localStorage.removeItem("admin_auth");
       localStorage.removeItem("admin_user");
     }

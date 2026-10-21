@@ -1,4 +1,9 @@
 import { neon } from "@neondatabase/serverless";
+import crypto from "crypto";
+
+function hashPassword(password, salt = "neon_auth_salt_portfolio_2026") {
+  return crypto.scryptSync(password, salt, 64).toString("hex");
+}
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -10,51 +15,107 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Email and password are required" });
   }
 
-  const normalizedEmail = email.toLowerCase().trim();
   const dbUrl = process.env.DATABASE_URL || process.env.NEON_DATABASE_URL;
+  if (!dbUrl) {
+    return res.status(500).json({ error: "DATABASE_URL is not configured" });
+  }
 
   try {
-    // 1. Check Neon PostgreSQL admin_users table if DB is available
-    if (dbUrl) {
-      const sql = neon(dbUrl);
-      // Auto-create table if needed
-      await sql`
-        CREATE TABLE IF NOT EXISTS admin_users (
-          id SERIAL PRIMARY KEY,
-          email VARCHAR(255) UNIQUE NOT NULL,
-          password_hash TEXT NOT NULL,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-        )
-      `;
+    const sql = neon(dbUrl);
+    const normalizedEmail = email.toLowerCase().trim();
 
-      const users = await sql`SELECT * FROM admin_users WHERE email = ${normalizedEmail} LIMIT 1`;
-      if (users.length > 0) {
-        // Compare password
-        if (users[0].password_hash === password) {
-          return res.json({
-            success: true,
-            user: { email: users[0].email, role: "admin" },
-          });
-        }
+    // 1. Verify user exists in neon_auth.user (No hardcoding - dynamically checked against Neon Auth)
+    const users = await sql`
+      SELECT 
+        u.id, 
+        u.name, 
+        u.email, 
+        u.role, 
+        a.id AS account_id, 
+        a.password AS password_hash
+      FROM neon_auth.user u
+      LEFT JOIN neon_auth.account a 
+        ON a."userId" = u.id AND a."providerId" = 'credential'
+      WHERE LOWER(u.email) = ${normalizedEmail}
+      LIMIT 1
+    `;
+
+    if (users.length === 0) {
+      return res.status(401).json({
+        error: "Access denied. User not found in Neon Auth.",
+      });
+    }
+
+    const user = users[0];
+    const incomingHash = hashPassword(password);
+
+    // 2. Password verification & first-time credential setup
+    if (!user.password_hash) {
+      // First-time login: Save the password hash for this Neon user
+      if (user.account_id) {
+        await sql`
+          UPDATE neon_auth.account 
+          SET password = ${incomingHash}, "updatedAt" = NOW() 
+          WHERE id = ${user.account_id}
+        `;
+      } else {
+        const newAccountId = crypto.randomUUID();
+        await sql`
+          INSERT INTO neon_auth.account (
+            id, "accountId", "providerId", "userId", password, "createdAt", "updatedAt"
+          ) VALUES (
+            ${newAccountId}, ${user.id}, 'credential', ${user.id}, ${incomingHash}, NOW(), NOW()
+          )
+        `;
+      }
+    } else {
+      // Compare password hash (or fallback plain text check)
+      const matches =
+        user.password_hash === incomingHash ||
+        user.password_hash === password;
+
+      if (!matches) {
+        return res.status(401).json({ error: "Invalid password." });
       }
     }
 
-    // 2. Env-based admin credentials check (default fallback for portfolio owner)
-    const adminEmail = (process.env.ADMIN_EMAIL || "garvrahut@gmail.com").toLowerCase().trim();
-    const adminPassword = process.env.ADMIN_PASSWORD;
+    // 3. Create real session in neon_auth.session
+    const sessionId = crypto.randomUUID();
+    const token = crypto.randomBytes(32).toString("hex");
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+    const userAgent = req.headers["user-agent"] || "Unknown Browser";
+    const ipAddress =
+      req.headers["x-forwarded-for"] || req.socket.remoteAddress || "127.0.0.1";
 
-    if (normalizedEmail === adminEmail) {
-      if (!adminPassword || password === adminPassword || password === "admin" || password === "garv123") {
-        return res.json({
-          success: true,
-          user: { email: normalizedEmail, role: "admin" },
-        });
-      }
-    }
+    await sql`
+      INSERT INTO neon_auth.session (
+        id, "userId", token, "expiresAt", "createdAt", "updatedAt", "userAgent", "ipAddress"
+      ) VALUES (
+        ${sessionId}, ${user.id}, ${token}, ${expiresAt}, NOW(), NOW(), ${userAgent}, ${String(ipAddress)}
+      )
+    `;
 
-    return res.status(401).json({ error: "Invalid email or password" });
+    // 4. Set HTTP-only secure cookie
+    const isProd = process.env.NODE_ENV === "production";
+    res.setHeader(
+      "Set-Cookie",
+      `neon_session_token=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800${
+        isProd ? "; Secure" : ""
+      }`
+    );
+
+    return res.json({
+      success: true,
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role || "admin",
+      },
+    });
   } catch (err) {
-    console.error("Neon Auth error:", err);
-    return res.status(500).json({ error: err.message });
+    console.error("Neon Auth login error:", err);
+    return res.status(500).json({ error: err.message || "Authentication error" });
   }
 }
