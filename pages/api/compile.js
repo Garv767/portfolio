@@ -26,7 +26,7 @@ async function handler(req, res) {
     return res.status(400).json({ error: "No LaTeX code provided" });
   }
 
-  // 1. Try local Tectonic compiler first (works in local dev)
+  // 1. Try local Tectonic compiler first (works in local dev if binary exists)
   const tectonicExe = path.resolve(process.cwd(), "bin/tectonic.exe");
   const tmpDir = path.resolve(process.cwd(), "scratch/compile_tmp");
 
@@ -53,26 +53,50 @@ async function handler(req, res) {
       }
     } catch (compileErr) {
       const errorLog = compileErr.stderr || compileErr.stdout || compileErr.message;
-      return res.status(422).json({ error: "LaTeX compilation failed", log: errorLog });
+      console.warn("Local tectonic compile notice:", errorLog?.slice?.(0, 200));
     }
   }
 
-  // 2. Cloud Fallback: Compile via online LaTeX compiler service on Vercel
+  // 2. Cloud Compiler (POST payload - avoids 414 Request-URI Too Large)
   try {
-    const url = "https://latexonline.cc/compile?text=" + encodeURIComponent(latex);
-    const cloudRes = await axios.get(url, {
-      responseType: "arraybuffer",
-      timeout: 30000,
-    });
-    res.setHeader("Content-Type", "application/pdf");
-    return res.send(Buffer.from(cloudRes.data));
-  } catch (cloudErr) {
-    const errData = cloudErr.response?.data ? cloudErr.response.data.toString() : cloudErr.message;
-    return res.status(500).json({
-      error: "Cloud compilation failed",
-      log: errData,
-    });
+    const cloudRes = await axios.post(
+      "https://latex.ytotech.com/builds/sync",
+      {
+        compiler: "pdflatex",
+        resources: [{ main: true, content: latex }],
+      },
+      {
+        responseType: "arraybuffer",
+        timeout: 35000,
+      }
+    );
+
+    if (cloudRes.status === 200 || cloudRes.status === 201) {
+      res.setHeader("Content-Type", "application/pdf");
+      return res.send(Buffer.from(cloudRes.data));
+    }
+  } catch (ytotechErr) {
+    console.warn("YtoTech compile error:", ytotechErr.response?.status || ytotechErr.message);
   }
+
+  // 3. Cloud Fallback (latexonline.cc via POST tar / URL if short)
+  try {
+    if (latex.length < 3000) {
+      const url = "https://latexonline.cc/compile?text=" + encodeURIComponent(latex);
+      const cloudRes2 = await axios.get(url, {
+        responseType: "arraybuffer",
+        timeout: 25000,
+      });
+      res.setHeader("Content-Type", "application/pdf");
+      return res.send(Buffer.from(cloudRes2.data));
+    }
+  } catch (fallbackErr) {
+    console.warn("Fallback compile error:", fallbackErr.message);
+  }
+
+  return res.status(422).json({
+    error: "LaTeX compilation failed. Please verify syntax, matched brackets, and packages.",
+  });
 }
 
 export default requireNeonAuth(handler);
