@@ -12,7 +12,7 @@ async function handler(req, res) {
 
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
-    const selectedModel = modelChoice || "gemini-2.0-flash";
+    const selectedModel = modelChoice || "gemini-2.5-flash";
     const model = genAI.getGenerativeModel({ model: selectedModel });
 
     const prompt = `You are an expert LaTeX resume editor.

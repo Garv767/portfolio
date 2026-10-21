@@ -10,8 +10,18 @@ function AiStudioModal({ show, onHide, onGenerated, currentLatexTemplate, templa
   const [targetRole, setTargetRole] = useState("");
   const [targetCompany, setTargetCompany] = useState("");
   const [customPrompt, setCustomPrompt] = useState("");
-  const [modelChoice, setModelChoice] = useState("gemini-2.0-flash");
-  const [apiKey, setApiKey] = useState(() => localStorage.getItem("gemini_api_key") || "");
+  const [modelChoice, setModelChoice] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("gemini_selected_model") || "gemini-2.5-flash";
+    }
+    return "gemini-2.5-flash";
+  });
+  const [apiKey, setApiKey] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("gemini_api_key") || "";
+    }
+    return "";
+  });
   const [rememberKey] = useState(true);
   
   const [uploading, setUploading] = useState(false);
@@ -226,12 +236,34 @@ function AiStudioModal({ show, onHide, onGenerated, currentLatexTemplate, templa
               <Form.Label style={{ fontSize: "0.85rem", color: "#c084f5", fontWeight: "600" }}>AI Model</Form.Label>
               <Form.Select
                 value={modelChoice}
-                onChange={(e) => setModelChoice(e.target.value)}
+                onChange={(e) => {
+                  setModelChoice(e.target.value);
+                  if (typeof window !== "undefined") {
+                    localStorage.setItem("gemini_selected_model", e.target.value);
+                  }
+                }}
                 style={{ background: "#21123a", border: "1px solid rgba(192,132,245,0.3)", color: "#fff" }}
               >
-                <option value="gemini-2.0-flash">⚡ Gemini 2.0 Flash (Recommended, Ultra Fast)</option>
-                <option value="gemini-2.0-flash-thinking-exp">🧠 Gemini 2.0 Flash Thinking (Deep Reasoning)</option>
-                <option value="gemini-1.5-pro">🏆 Gemini 1.5 Pro (Executive Writing)</option>
+                <optgroup label="✨ Next-Gen Flagship & Extended Reasoning">
+                  <option value="gemini-4-argon">🔥 Gemini 4 Argon (Flagship Reasoning & Code)</option>
+                  <option value="gemini-3.8-flash">⚡ Gemini 3.8 Flash (High-Efficiency Workhorse)</option>
+                  <option value="gemini-3.8-live-extended-thinking">🧠 Gemini 3.8 Live Extended Thinking</option>
+                  <option value="gemini-3.6-flash">🚀 Gemini 3.6 Flash (Fast Text & Code)</option>
+                  <option value="gemini-3.5-flash-lite">🏎️ Gemini 3.5 Flash-Lite (Low Latency)</option>
+                  <option value="gemini-3.1-pro-preview">💎 Gemini 3.1 Pro Preview (Deep Context)</option>
+                  <option value="gemini-3.1-flash-lite">💡 Gemini 3.1 Flash-Lite</option>
+                  <option value="gemini-3-flash-preview">🌟 Gemini 3 Flash Preview</option>
+                  <option value="gemini-omni-1.1-flash">🔮 Gemini Omni Flash (1.1 Flash)</option>
+                </optgroup>
+                <optgroup label="⚡ Gemini 2.5 Family">
+                  <option value="gemini-2.5-pro">🏆 Gemini 2.5 Pro (Deep Reasoning & LaTeX)</option>
+                  <option value="gemini-2.5-flash">⚡ Gemini 2.5 Flash (Best Price-Performance)</option>
+                  <option value="gemini-2.5-flash-lite">🌱 Gemini 2.5 Flash-Lite (Budget-Friendly)</option>
+                </optgroup>
+                <optgroup label="⚡ Production Baseline">
+                  <option value="gemini-2.0-flash">⚡ Gemini 2.0 Flash (Stable Default)</option>
+                  <option value="gemini-1.5-pro">📑 Gemini 1.5 Pro</option>
+                </optgroup>
               </Form.Select>
             </Form.Group>
           </Col>

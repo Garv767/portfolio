@@ -31,7 +31,7 @@ function LatexEditor({
       const res = await axios.post(`${API_BASE}/ai/refine`, {
         currentLatex: content,
         instruction: refinePrompt,
-        modelChoice: "gemini-2.0-flash",
+        modelChoice: localStorage.getItem("gemini_selected_model") || "gemini-2.5-flash",
         clientApiKey: apiKey,
       });
 
