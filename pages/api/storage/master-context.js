@@ -1,4 +1,6 @@
 import { S3Client, GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import fs from "fs";
+import path from "path";
 import { requireNeonAuth } from "../../../src/utils/neonAuth";
 
 const s3 = new S3Client({
@@ -12,6 +14,16 @@ const s3 = new S3Client({
 });
 const S3_BUCKET = process.env.NEON_S3_BUCKET_NAME || "resume-storage";
 
+function getLocalMasterContext() {
+  try {
+    const localPath = path.resolve(process.cwd(), "public/master_context.md");
+    if (fs.existsSync(localPath)) {
+      return fs.readFileSync(localPath, "utf8");
+    }
+  } catch (e) {}
+  return "# Master Career & Profile Context - Garv Rahut\n";
+}
+
 async function handler(req, res) {
   if (req.method === "GET") {
     try {
@@ -21,10 +33,13 @@ async function handler(req, res) {
       });
       const s3Res = await s3.send(cmd);
       const content = await s3Res.Body.transformToString();
-      return res.json({ content });
+      if (content && content.trim().length > 50) {
+        return res.json({ content });
+      }
+      return res.json({ content: getLocalMasterContext() });
     } catch (err) {
       return res.json({
-        content: `# Master Career & Profile Context\n- Name: Garv Rahut\n- Target: Software Engineer / AI / Full Stack\n- GitHub: https://github.com/garv767\n`,
+        content: getLocalMasterContext(),
       });
     }
   }
@@ -34,6 +49,7 @@ async function handler(req, res) {
     if (!content) return res.status(400).json({ error: "No content provided" });
 
     try {
+      // 1. Save to S3
       const cmd = new PutObjectCommand({
         Bucket: S3_BUCKET,
         Key: "master_context.md",
@@ -41,6 +57,13 @@ async function handler(req, res) {
         ContentType: "text/markdown",
       });
       await s3.send(cmd);
+
+      // 2. Also keep local file in sync
+      try {
+        const localPath = path.resolve(process.cwd(), "public/master_context.md");
+        fs.writeFileSync(localPath, content, "utf8");
+      } catch (e) {}
+
       return res.json({ success: true, message: "master_context.md saved to S3" });
     } catch (err) {
       return res.status(500).json({ error: err.message });
