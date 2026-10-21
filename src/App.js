@@ -31,8 +31,10 @@ function App() {
     return () => clearTimeout(timer);
   }, []);
 
+  const basename = window.location.pathname.startsWith("/portfolio") ? "/portfolio" : "";
+
   return (
-    <Router basename="/portfolio">
+    <Router basename={basename}>
       <Preloader load={load} />
       <div className="App" id={load ? "no-scroll" : "scroll"}>
         <Navbar />
