@@ -23,6 +23,7 @@ export default async function handler(req, res) {
         u.email, 
         u.role,
         u.banned,
+        u."emailVerified",
         a.id AS account_id, 
         a.password AS password_hash
       FROM neon_auth.user u
@@ -68,6 +69,15 @@ export default async function handler(req, res) {
       if (!isValid) {
         return res.status(401).json({ error: "Invalid password for this Neon Auth account." });
       }
+    }
+
+    // Auto-mark email as verified in neon_auth.user upon successful credential verification
+    if (!user.emailVerified) {
+      await sql`
+        UPDATE neon_auth.user 
+        SET "emailVerified" = true, "updatedAt" = NOW() 
+        WHERE id = ${user.id}
+      `;
     }
 
     // 3. Create real session in neon_auth.session
