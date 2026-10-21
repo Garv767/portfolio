@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { neon } from "@neondatabase/serverless";
+import { requireNeonAuth } from "../../../src/utils/neonAuth";
 
 const s3 = new S3Client({
   endpoint: process.env.AWS_ENDPOINT_URL_S3,
@@ -13,7 +14,7 @@ const s3 = new S3Client({
 });
 const S3_BUCKET = process.env.NEON_S3_BUCKET_NAME || "resume-storage";
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   const { jdText, targetRole, targetCompany, customPrompt, templateSkeleton, modelChoice, clientApiKey } = req.body;
@@ -97,3 +98,5 @@ ${templateSkeleton}
     return res.status(500).json({ error: err.message });
   }
 }
+
+export default requireNeonAuth(handler);

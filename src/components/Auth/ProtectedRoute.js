@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Container, Row, Col, Card, Form, Button, Alert, Spinner, Badge } from "react-bootstrap";
-import { AiOutlineLock, AiOutlineSafetyCertificate, AiOutlineUser } from "react-icons/ai";
+import { AiOutlineLock, AiOutlineSafetyCertificate } from "react-icons/ai";
 import Particle from "../Particle";
 
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = ({ children, initialAuthenticated, initialUser = null }) => {
+  const isServerKnown = typeof initialAuthenticated === "boolean";
   const [authState, setAuthState] = useState({
-    loading: true,
-    authenticated: false,
-    user: null,
+    loading: isServerKnown ? false : true,
+    authenticated: !!initialAuthenticated,
+    user: initialUser,
   });
 
   // Login form state for the auth wall
@@ -18,6 +19,9 @@ const ProtectedRoute = ({ children }) => {
   const [errorMsg, setErrorMsg] = useState("");
 
   const checkSession = async () => {
+    // If the server already determined authentication, verify if local token exists or skip
+    if (initialAuthenticated) return;
+
     try {
       const storedToken =
         typeof window !== "undefined"
@@ -56,8 +60,10 @@ const ProtectedRoute = ({ children }) => {
   };
 
   useEffect(() => {
-    checkSession();
-  }, []);
+    if (!isServerKnown) {
+      checkSession();
+    }
+  }, [isServerKnown]);
 
   const handleWallLogin = async (e) => {
     e.preventDefault();
@@ -97,7 +103,7 @@ const ProtectedRoute = ({ children }) => {
     }
   };
 
-  // 1. Initial verification loading state
+  // 1. Initial verification loading state (only for client-side navigation without SSR)
   if (authState.loading) {
     return (
       <div
@@ -144,7 +150,7 @@ const ProtectedRoute = ({ children }) => {
             <Card
               className="project-card-view"
               style={{
-                background: "rgba(18, 11, 28, 0.85)",
+                background: "rgba(18, 11, 28, 0.88)",
                 backdropFilter: "blur(16px)",
                 border: "1px solid rgba(192, 132, 245, 0.4)",
                 boxShadow: "0 10px 40px rgba(0, 0, 0, 0.6)",
@@ -208,11 +214,11 @@ const ProtectedRoute = ({ children }) => {
                 <Form onSubmit={handleWallLogin}>
                   <Form.Group className="mb-3" controlId="wallEmail">
                     <Form.Label style={{ color: "#e0e0e0", fontSize: "0.9rem" }}>
-                      Authorized Email
+                      Neon Auth Email
                     </Form.Label>
                     <Form.Control
                       type="email"
-                      placeholder="e.g. garvrahut@gmail.com"
+                      placeholder="Enter authorized user email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       style={{

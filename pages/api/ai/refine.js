@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { requireNeonAuth } from "../../../src/utils/neonAuth";
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   const { currentLatex, instruction, modelChoice, clientApiKey } = req.body;
@@ -45,3 +46,5 @@ ${currentLatex}
     return res.status(500).json({ error: err.message });
   }
 }
+
+export default requireNeonAuth(handler);

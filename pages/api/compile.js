@@ -3,6 +3,7 @@ import path from "path";
 import { execFile } from "child_process";
 import { promisify } from "util";
 import axios from "axios";
+import { requireNeonAuth } from "../../src/utils/neonAuth";
 
 const execFilePromise = promisify(execFile);
 
@@ -15,7 +16,7 @@ export const config = {
   },
 };
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
@@ -73,3 +74,5 @@ export default async function handler(req, res) {
     });
   }
 }
+
+export default requireNeonAuth(handler);

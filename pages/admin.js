@@ -2,6 +2,7 @@ import React from "react";
 import dynamic from "next/dynamic";
 import Head from "next/head";
 import ProtectedRoute from "../src/components/Auth/ProtectedRoute";
+import { verifyNeonSession } from "../src/utils/neonAuth";
 
 const AdminDashboard = dynamic(
   () => import("../src/components/Admin/AdminDashboard"),
@@ -10,16 +11,34 @@ const AdminDashboard = dynamic(
   }
 );
 
-export default function AdminPage() {
+export default function AdminPage({ initialAuthenticated, initialUser }) {
   return (
     <>
       <Head>
-        <title>Admin Dashboard & Resume Studio | Garv Rahut</title>
+        <title>
+          {initialAuthenticated
+            ? "Admin Dashboard & Resume Studio | Garv Rahut"
+            : "Admin Auth Wall | Garv Rahut"}
+        </title>
         <meta name="robots" content="noindex, nofollow" />
       </Head>
-      <ProtectedRoute>
+      <ProtectedRoute
+        initialAuthenticated={initialAuthenticated}
+        initialUser={initialUser}
+      >
         <AdminDashboard />
       </ProtectedRoute>
     </>
   );
+}
+
+export async function getServerSideProps(context) {
+  const session = await verifyNeonSession(context.req);
+
+  return {
+    props: {
+      initialAuthenticated: session.authenticated || false,
+      initialUser: session.user || null,
+    },
+  };
 }

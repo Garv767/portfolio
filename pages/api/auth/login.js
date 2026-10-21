@@ -1,9 +1,5 @@
-import { neon } from "@neondatabase/serverless";
 import crypto from "crypto";
-
-function hashPassword(password, salt = "neon_auth_salt_portfolio_2026") {
-  return crypto.scryptSync(password, salt, 64).toString("hex");
-}
+import { getDb, hashPassword, verifyPassword } from "../../../src/utils/neonAuth";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -15,22 +11,18 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Email and password are required" });
   }
 
-  const dbUrl = process.env.DATABASE_URL || process.env.NEON_DATABASE_URL;
-  if (!dbUrl) {
-    return res.status(500).json({ error: "DATABASE_URL is not configured" });
-  }
-
   try {
-    const sql = neon(dbUrl);
+    const sql = getDb();
     const normalizedEmail = email.toLowerCase().trim();
 
-    // 1. Verify user exists in neon_auth.user (No hardcoding - dynamically checked against Neon Auth)
+    // 1. Verify user dynamically in neon_auth.user (No hardcoded emails)
     const users = await sql`
       SELECT 
         u.id, 
         u.name, 
         u.email, 
-        u.role, 
+        u.role,
+        u.banned,
         a.id AS account_id, 
         a.password AS password_hash
       FROM neon_auth.user u
@@ -42,20 +34,23 @@ export default async function handler(req, res) {
 
     if (users.length === 0) {
       return res.status(401).json({
-        error: "Access denied. User not found in Neon Auth.",
+        error: "Access denied. Email is not registered as an authorized user in Neon Auth.",
       });
     }
 
     const user = users[0];
-    const incomingHash = hashPassword(password);
+    if (user.banned) {
+      return res.status(403).json({ error: "This Neon Auth account is suspended." });
+    }
 
     // 2. Password verification & first-time credential setup
     if (!user.password_hash) {
-      // First-time login: Save the password hash for this Neon user
+      // First-time login: Securely store password hash using scrypt (Better Auth format)
+      const newHash = hashPassword(password);
       if (user.account_id) {
         await sql`
           UPDATE neon_auth.account 
-          SET password = ${incomingHash}, "updatedAt" = NOW() 
+          SET password = ${newHash}, "updatedAt" = NOW() 
           WHERE id = ${user.account_id}
         `;
       } else {
@@ -64,25 +59,21 @@ export default async function handler(req, res) {
           INSERT INTO neon_auth.account (
             id, "accountId", "providerId", "userId", password, "createdAt", "updatedAt"
           ) VALUES (
-            ${newAccountId}, ${user.id}, 'credential', ${user.id}, ${incomingHash}, NOW(), NOW()
+            ${newAccountId}, ${user.id}, 'credential', ${user.id}, ${newHash}, NOW(), NOW()
           )
         `;
       }
     } else {
-      // Compare password hash (or fallback plain text check)
-      const matches =
-        user.password_hash === incomingHash ||
-        user.password_hash === password;
-
-      if (!matches) {
-        return res.status(401).json({ error: "Invalid password." });
+      const isValid = verifyPassword(password, user.password_hash);
+      if (!isValid) {
+        return res.status(401).json({ error: "Invalid password for this Neon Auth account." });
       }
     }
 
     // 3. Create real session in neon_auth.session
     const sessionId = crypto.randomUUID();
     const token = crypto.randomBytes(32).toString("hex");
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7-day session
     const userAgent = req.headers["user-agent"] || "Unknown Browser";
     const ipAddress =
       req.headers["x-forwarded-for"] || req.socket.remoteAddress || "127.0.0.1";

@@ -1,26 +1,12 @@
-import { neon } from "@neondatabase/serverless";
-
-function parseCookies(cookieHeader) {
-  const list = {};
-  if (!cookieHeader) return list;
-  cookieHeader.split(";").forEach((cookie) => {
-    let [name, ...rest] = cookie.split("=");
-    name = name?.trim();
-    if (!name) return;
-    const value = rest.join("=").trim();
-    list[name] = decodeURIComponent(value);
-  });
-  return list;
-}
+import { getDb, parseCookies } from "../../../src/utils/neonAuth";
 
 export default async function handler(req, res) {
   const cookies = parseCookies(req.headers.cookie);
   const token = cookies.neon_session_token || req.body?.token;
-  const dbUrl = process.env.DATABASE_URL || process.env.NEON_DATABASE_URL;
 
-  if (token && dbUrl) {
+  if (token) {
     try {
-      const sql = neon(dbUrl);
+      const sql = getDb();
       await sql`DELETE FROM neon_auth.session WHERE token = ${token}`;
     } catch (e) {
       console.error("Error deleting session:", e);

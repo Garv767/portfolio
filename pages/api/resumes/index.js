@@ -1,9 +1,7 @@
-import { neon } from "@neondatabase/serverless";
+import { getDb, requireNeonAuth } from "../../../src/utils/neonAuth";
 
-export default async function handler(req, res) {
-  const dbUrl = process.env.DATABASE_URL || process.env.NEON_DATABASE_URL;
-  if (!dbUrl) return res.status(500).json({ error: "DATABASE_URL not configured" });
-  const sql = neon(dbUrl);
+async function handler(req, res) {
+  const sql = getDb();
 
   if (req.method === "GET") {
     try {
@@ -57,3 +55,5 @@ export default async function handler(req, res) {
 
   return res.status(405).json({ error: "Method not allowed" });
 }
+
+export default requireNeonAuth(handler);

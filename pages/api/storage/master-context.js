@@ -1,4 +1,5 @@
 import { S3Client, GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { requireNeonAuth } from "../../../src/utils/neonAuth";
 
 const s3 = new S3Client({
   endpoint: process.env.AWS_ENDPOINT_URL_S3,
@@ -11,7 +12,7 @@ const s3 = new S3Client({
 });
 const S3_BUCKET = process.env.NEON_S3_BUCKET_NAME || "resume-storage";
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   if (req.method === "GET") {
     try {
       const cmd = new GetObjectCommand({
@@ -48,3 +49,5 @@ export default async function handler(req, res) {
 
   return res.status(405).json({ error: "Method not allowed" });
 }
+
+export default requireNeonAuth(handler);

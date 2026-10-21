@@ -1,11 +1,8 @@
-import { neon } from "@neondatabase/serverless";
+import { getDb, verifyNeonSession } from "../../src/utils/neonAuth";
 
 export default async function handler(req, res) {
-  const dbUrl = process.env.DATABASE_URL || process.env.NEON_DATABASE_URL;
-  if (!dbUrl) return res.status(500).json({ error: "DATABASE_URL not configured" });
-
   try {
-    const sql = neon(dbUrl);
+    const sql = getDb();
 
     if (req.method === "GET") {
       const projects = await sql`SELECT * FROM portfolio_projects ORDER BY priority ASC`;
@@ -13,6 +10,14 @@ export default async function handler(req, res) {
     }
 
     if (req.method === "POST" || req.method === "PUT") {
+      // Require Neon Auth for mutations
+      const session = await verifyNeonSession(req);
+      if (!session.authenticated) {
+        return res.status(401).json({
+          error: "Unauthorized: Active Neon Auth session required to edit projects.",
+        });
+      }
+
       const body = req.body;
 
       // Batch update (e.g. priorities after drag-and-drop)
