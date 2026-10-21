@@ -3,7 +3,7 @@ import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
 import Container from "react-bootstrap/Container";
 import Button from "react-bootstrap/Button";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { CgGitFork } from "react-icons/cg";
 import {
   AiFillStar,
@@ -19,7 +19,7 @@ function NavBar() {
   const [navColour, updateNavbar] = useState(false);
 
   function scrollHandler() {
-    if (window.scrollY >= 20) {
+    if (typeof window !== "undefined" && window.scrollY >= 20) {
       updateNavbar(true);
     } else {
       updateNavbar(false);
@@ -29,7 +29,7 @@ function NavBar() {
   useEffect(() => {
     window.addEventListener("scroll", scrollHandler);
     return () => window.removeEventListener("scroll", scrollHandler);
-  });
+  }, []);
 
   return (
     <Navbar
@@ -52,7 +52,7 @@ function NavBar() {
         <Navbar.Collapse id="responsive-navbar-nav">
           <Nav className="ms-auto" defaultActiveKey="#home">
             <Nav.Item>
-              <Nav.Link as={Link} to="/" onClick={() => updateExpanded(false)}>
+              <Nav.Link as={Link} href="/" onClick={() => updateExpanded(false)}>
                 <AiOutlineHome style={{ marginBottom: "2px" }} /> Home
               </Nav.Link>
             </Nav.Item>
@@ -60,7 +60,7 @@ function NavBar() {
             <Nav.Item>
               <Nav.Link
                 as={Link}
-                to="/about"
+                href="/about"
                 onClick={() => updateExpanded(false)}
               >
                 <AiOutlineUser style={{ marginBottom: "2px" }} /> About
@@ -70,7 +70,7 @@ function NavBar() {
             <Nav.Item>
               <Nav.Link
                 as={Link}
-                to="/project"
+                href="/project"
                 onClick={() => updateExpanded(false)}
               >
                 <AiOutlineFundProjectionScreen
@@ -83,7 +83,7 @@ function NavBar() {
             <Nav.Item>
               <Nav.Link
                 as={Link}
-                to="/resume"
+                href="/resume"
                 onClick={() => updateExpanded(false)}
               >
                 <CgFileDocument style={{ marginBottom: "2px" }} /> Resume

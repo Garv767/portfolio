@@ -2,16 +2,22 @@ import React, { useState, useEffect } from "react";
 import { Container, Row } from "react-bootstrap";
 import Button from "react-bootstrap/Button";
 import Particle from "../Particle";
-import pdf from "../../Assets/GARV_RAHUT_resume.pdf";
 import { AiOutlineDownload } from "react-icons/ai";
 import { Document, Page, pdfjs } from "react-pdf";
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+
+const pdf = "/GARV_RAHUT_resume.pdf";
+
+if (typeof window !== "undefined") {
+  pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+}
 
 function ResumeNew() {
   const [width, setWidth] = useState(1200);
 
   useEffect(() => {
-    setWidth(window.innerWidth);
+    if (typeof window !== "undefined") {
+      setWidth(window.innerWidth);
+    }
   }, []);
 
   return (

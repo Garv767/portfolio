@@ -28,7 +28,7 @@ function App() {
     return () => clearTimeout(timer);
   }, []);
 
-  const basename = window.location.pathname.startsWith("/portfolio") ? "/portfolio" : "";
+  const basename = "";
 
   return (
     <Router basename={basename}>

@@ -34,3 +34,7 @@ Server/config.js
 bin/
 scratch/
 test_output.pdf
+*.csv
+*.py
+test-*.js
+desktop.ini

@@ -6,7 +6,7 @@ import axios from "axios";
 import Particle from "../Particle";
 import { CgWebsite } from "react-icons/cg";
 import { AiOutlineEye, AiOutlineEyeInvisible, AiOutlineSave, AiOutlineLogout, AiOutlineCheck, AiOutlineDown, AiOutlineRight, AiOutlineThunderbolt, AiOutlineAppstore } from "react-icons/ai";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/router";
 import ResumeStudio from "../ResumeBuilder/ResumeStudio";
 
 const GITHUB_USERNAME = "garv767";
@@ -32,7 +32,7 @@ function AdminDashboard() {
   const [dirtyState, setDirtyState] = useState({});
   // Per-repo save status: 'idle' | 'saving' | 'saved'
   const [saveStatus, setSaveStatus] = useState({});
-  const navigate = useNavigate();
+  const router = useRouter();
 
   useEffect(() => {
     fetchData();
@@ -196,7 +196,7 @@ function AdminDashboard() {
   const handleLogout = async () => {
     console.log("Logging out...");
     await supabase.auth.signOut();
-    navigate("/login");
+    router.push("/login");
   };
 
   const getSaveButton = (repoName) => {

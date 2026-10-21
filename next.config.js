@@ -8,6 +8,20 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  async redirects() {
+    return [
+      {
+        source: "/portfolio",
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/portfolio/:path*",
+        destination: "/:path*",
+        permanent: true,
+      },
+    ];
+  },
   webpack: (config) => {
     config.module.rules.push({
       test: /\.(pdf)$/i,

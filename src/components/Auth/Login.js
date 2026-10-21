@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Container, Row, Col, Form, Button, Alert, Card } from "react-bootstrap";
 import { supabase } from "../../utils/supabaseClient";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/router";
 import Particle from "../Particle";
 
 function Login() {
@@ -9,7 +9,7 @@ function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -18,7 +18,7 @@ function Login() {
       setError(null);
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
-      navigate("/admin");
+      router.push("/admin");
     } catch (err) {
       setError(err.message);
     } finally {

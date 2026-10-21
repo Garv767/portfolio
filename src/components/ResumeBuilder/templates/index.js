@@ -41,7 +41,7 @@ export const JAKE_RESUME_TEMPLATE = `\\documentclass[letterpaper,11pt]{article}
     \\small +91-XXXXXXXXXX $|$ \\href{mailto:garvrahut@example.com}{\\underline{garvrahut@example.com}} $|$ 
     \\href{https://linkedin.com/in/garv}{\\underline{linkedin.com/in/garv}} $|$
     \\href{https://github.com/garv767}{\\underline{github.com/garv767}} $|$
-    \\href{https://garv767.github.io/portfolio}{\\underline{portfolio}}
+    \\href{https://garv767.github.io}{\\underline{portfolio}}
 \\end{center}
 
 %-----------EDUCATION-----------
@@ -129,7 +129,7 @@ export const MODERN_TECH_TEMPLATE = `\\documentclass[letterpaper,10pt]{article}
     {\\Huge\\bfseries Garv Rahut} \\\\[3pt]
     \\small\\color{darkgray}
     Email: \\href{mailto:garvrahut@example.com}{garvrahut@example.com} \\; | \\;
-    Portfolio: \\href{https://garv767.github.io/portfolio}{garv767.github.io} \\; | \\;
+    Portfolio: \\href{https://garv767.github.io}{garv767.github.io} \\; | \\;
     GitHub: \\href{https://github.com/garv767}{github.com/garv767}
 \\end{center}
 
@@ -188,7 +188,7 @@ export const MINIMAL_TEMPLATE = `\\documentclass[letterpaper,10pt]{article}
 \\begin{center}
 {\\textbf{\\LARGE GARV RAHUT}} \\\\
 \\vspace{2pt}
-garvrahut@example.com \\; | \\; \\href{https://github.com/garv767}{github.com/garv767} \\; | \\; \\href{https://garv767.github.io/portfolio}{portfolio}
+garvrahut@example.com \\; | \\; \\href{https://github.com/garv767}{github.com/garv767} \\; | \\; \\href{https://garv767.github.io}{portfolio}
 \\end{center}
 \\vspace{-4pt}
 \\hrule

@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { useRouter } from "next/router";
 import { supabase } from "../../utils/supabaseClient";
 import Preloader from "../Pre";
 
 const ProtectedRoute = ({ children }) => {
   const [session, setSession] = useState(undefined);
+  const router = useRouter();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -20,14 +21,20 @@ const ProtectedRoute = ({ children }) => {
     return () => subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (session === null && process.env.NODE_ENV === "production") {
+      router.replace("/login");
+    }
+  }, [session, router]);
+
   // Still checking session — show preloader
   if (session === undefined) {
     return <Preloader load={true} />;
   }
 
-  // Not logged in (in production) — redirect to login
+  // Not logged in (in production)
   if (!session && process.env.NODE_ENV === "production") {
-    return <Navigate to="/login" replace />;
+    return <Preloader load={true} />;
   }
 
   return children;
