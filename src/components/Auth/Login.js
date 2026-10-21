@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Container, Row, Col, Form, Button, Alert, Card } from "react-bootstrap";
-import { supabase } from "../../utils/supabaseClient";
+import axios from "axios";
 import { useRouter } from "next/router";
 import Particle from "../Particle";
 
@@ -16,11 +16,18 @@ function Login() {
     try {
       setLoading(true);
       setError(null);
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-      router.push("/admin");
+      const res = await axios.post("/api/auth/login", { email, password });
+      if (res.data?.success) {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("admin_auth", "true");
+          localStorage.setItem("admin_user", JSON.stringify(res.data.user || { email }));
+        }
+        router.push("/admin");
+      } else {
+        setError(res.data?.error || "Login failed");
+      }
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.error || err.message || "Authentication failed");
     } finally {
       setLoading(false);
     }
@@ -50,7 +57,7 @@ function Login() {
                     <Form.Label style={{ color: "white" }}>Email address</Form.Label>
                     <Form.Control
                       type="email"
-                      placeholder="Enter email"
+                      placeholder="Enter admin email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       style={{

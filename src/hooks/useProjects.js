@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { supabase } from "../utils/supabaseClient";
 
 const GITHUB_USERNAME = "garv767";
 
@@ -20,15 +19,11 @@ const useProjects = () => {
         );
         const ghRepos = ghResponse.data;
 
-        // 2. Fetch Supabase Configs
-        const { data: dbConfigs, error: dbError } = await supabase
-          .from("portfolio_projects")
-          .select("*")
-          .order("priority", { ascending: true });
+        // 2. Fetch Neon DB Configs
+        const dbRes = await axios.get("/api/projects").catch(() => ({ data: [] }));
+        const dbConfigs = Array.isArray(dbRes.data) ? dbRes.data : [];
 
-        if (dbError) throw dbError;
-
-        // 3. Merge: Supabase overrides take priority over GitHub data
+        // 3. Merge: Neon DB overrides take priority over GitHub data
         const configMap = new Map();
         dbConfigs.forEach((c) => configMap.set(c.repo_name, c));
 

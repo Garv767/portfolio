@@ -6,6 +6,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "../src/style.css";
 import "../src/App.css";
+import "../src/index.css";
 
 import Preloader from "../src/components/Pre";
 import Navbar from "../src/components/Navbar";

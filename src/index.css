@@ -1,11 +1,14 @@
-/* @import url('https://fonts.googleapis.com/css2?family=Outfit&display=swap'); */
-
 @import url("https://fonts.googleapis.com/css2?family=Outfit&family=PT+Mono&display=swap");
 
-body {
+html,
+body,
+.App {
   margin: 0;
   font-family: "PT Mono", monospace !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-image: linear-gradient(to left, rgb(27 20 41), rgb(20 15 35));
+  background-color: #140f23 !important;
+  background-image: linear-gradient(to left, rgb(27 20 41), rgb(20 15 35)) !important;
+  color: white;
+  min-height: 100vh;
 }

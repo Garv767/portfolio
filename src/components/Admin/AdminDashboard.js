@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Container, Button, Form, Collapse, Badge } from "react-bootstrap";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { supabase } from "../../utils/supabaseClient";
 import axios from "axios";
 import Particle from "../Particle";
 import { CgWebsite } from "react-icons/cg";
@@ -46,12 +45,8 @@ function AdminDashboard() {
       );
       const ghRepos = ghRes.data;
 
-      const { data: dbData, error } = await supabase
-        .from("portfolio_projects")
-        .select("*")
-        .order("priority", { ascending: true });
-
-      if (error) throw error;
+      const dbRes = await axios.get("/api/projects").catch(() => ({ data: [] }));
+      const dbData = Array.isArray(dbRes.data) ? dbRes.data : [];
 
       const configMap = new Map();
       dbData.forEach((d) => configMap.set(d.repo_name, d));
@@ -133,8 +128,8 @@ function AdminDashboard() {
         ? null
         : repo.demo_url_override || repo.demo_url;
 
-    const { error } = await supabase.from("portfolio_projects").upsert(
-      {
+    try {
+      await axios.post("/api/projects", {
         repo_name: repoName,
         display_title: repo.display_title,
         custom_description: repo.custom_description,
@@ -142,14 +137,8 @@ function AdminDashboard() {
         demo_url: demoToSave,
         is_visible: repo.is_visible,
         priority: repo.priority,
-      },
-      { onConflict: "repo_name" }
-    );
+      });
 
-    if (error) {
-      console.error("Error saving:", error);
-      setSaveStatus((prev) => ({ ...prev, [repoName]: "idle" }));
-    } else {
       setSaveStatus((prev) => ({ ...prev, [repoName]: "saved" }));
       setDirtyState((prev) => {
         const next = { ...prev };
@@ -160,6 +149,9 @@ function AdminDashboard() {
         () => setSaveStatus((prev) => ({ ...prev, [repoName]: "idle" })),
         2000
       );
+    } catch (err) {
+      console.error("Error saving:", err);
+      setSaveStatus((prev) => ({ ...prev, [repoName]: "idle" }));
     }
   };
 
@@ -187,15 +179,21 @@ function AdminDashboard() {
       repo_name: item.repo_name,
       priority: item.priority,
     }));
-    const { error } = await supabase
-      .from("portfolio_projects")
-      .upsert(updates, { onConflict: "repo_name" });
-    if (error) console.error("Error updating priorities:", error);
+    try {
+      await axios.post("/api/projects", updates);
+    } catch (err) {
+      console.error("Error updating priorities:", err);
+    }
   };
 
   const handleLogout = async () => {
-    console.log("Logging out...");
-    await supabase.auth.signOut();
+    try {
+      await axios.post("/api/auth/logout");
+    } catch (e) {}
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("admin_auth");
+      localStorage.removeItem("admin_user");
+    }
     router.push("/login");
   };
 

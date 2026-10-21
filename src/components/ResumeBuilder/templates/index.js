@@ -56,7 +56,7 @@ export const JAKE_RESUME_TEMPLATE = `\\documentclass[letterpaper,11pt]{article}
     \\small{\\item{
      \\textbf{Languages}{: Python, JavaScript, TypeScript, C++, SQL, HTML/CSS} \\\\
      \\textbf{Frameworks \\& Libraries}{: React, Next.js, Node.js, Express, Bootstrap, PyTorch, Pandas, Scikit-Learn} \\\\
-     \\textbf{Databases \\& Cloud}{: PostgreSQL (Neon), Supabase, Redis, AWS S3, Docker, Git, Vercel} \\\\
+     \\textbf{Databases \\& Cloud}{: PostgreSQL (Neon DB/Auth), Redis, AWS S3, Docker, Git, Vercel} \\\\
      \\textbf{Core Competencies}{: RESTful APIs, Distributed Data Processing, NLP Systems, Full-Stack Architecture}
     }}
  \\end{itemize}
@@ -141,7 +141,7 @@ Software Engineer specializing in full-stack platforms, distributed systems, and
     \\item \\textbf{Languages:} Python, JavaScript (ES6+), TypeScript, C++, SQL
     \\item \\textbf{Frameworks:} React, Next.js, Node.js, Express, Bootstrap
     \\item \\textbf{Data \\& AI:} PyTorch, Pandas, Scikit-Learn, Vectorization, NLP
-    \\item \\textbf{Cloud \\& DevOps:} Neon PostgreSQL, Supabase, AWS S3, Docker, Git, Vercel
+    \\item \\textbf{Cloud \\& DevOps:} Neon PostgreSQL/Auth, AWS S3, Docker, Git, Vercel
 \\end{itemize}
 
 \\section{Experience}
