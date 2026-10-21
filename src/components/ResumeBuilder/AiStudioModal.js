@@ -12,9 +12,13 @@ function AiStudioModal({ show, onHide, onGenerated, currentLatexTemplate, templa
   const [customPrompt, setCustomPrompt] = useState("");
   const [modelChoice, setModelChoice] = useState(() => {
     if (typeof window !== "undefined") {
-      return localStorage.getItem("gemini_selected_model") || "gemini-2.5-flash";
+      const stored = localStorage.getItem("gemini_selected_model");
+      if (stored && !stored.includes("2.0") && !stored.includes("2.5-flash")) {
+        return stored;
+      }
+      return "gemini-3.8-flash";
     }
-    return "gemini-2.5-flash";
+    return "gemini-3.8-flash";
   });
   const [apiKey, setApiKey] = useState(() => {
     if (typeof window !== "undefined") {
@@ -244,27 +248,26 @@ function AiStudioModal({ show, onHide, onGenerated, currentLatexTemplate, templa
                 }}
                 style={{ background: "#21123a", border: "1px solid rgba(192,132,245,0.3)", color: "#fff" }}
               >
-                <optgroup label="✨ Next-Gen Flagship & Extended Reasoning">
-                  <option value="gemini-4-argon">🔥 Gemini 4 Argon (Flagship Reasoning & Code)</option>
+                <optgroup label="⚡ Recommended Active Models (Google AI Studio)">
                   <option value="gemini-3.8-flash">⚡ Gemini 3.8 Flash (High-Efficiency Workhorse)</option>
-                  <option value="gemini-3.8-live-extended-thinking">🧠 Gemini 3.8 Live Extended Thinking</option>
+                  <option value="gemini-3.5-flash-lite">🏎️ Gemini 3.5 Flash-Lite (Low Latency, High Availability)</option>
+                  <option value="gemini-4-argon">🔥 Gemini 4 Argon (Flagship Reasoning & Code)</option>
                   <option value="gemini-3.6-flash">🚀 Gemini 3.6 Flash (Fast Text & Code)</option>
-                  <option value="gemini-3.5-flash-lite">🏎️ Gemini 3.5 Flash-Lite (Low Latency)</option>
+                  <option value="gemini-3.8-live-extended-thinking">🧠 Gemini 3.8 Live Extended Thinking</option>
                   <option value="gemini-3.1-pro-preview">💎 Gemini 3.1 Pro Preview (Deep Context)</option>
                   <option value="gemini-3.1-flash-lite">💡 Gemini 3.1 Flash-Lite</option>
                   <option value="gemini-3-flash-preview">🌟 Gemini 3 Flash Preview</option>
                   <option value="gemini-omni-1.1-flash">🔮 Gemini Omni Flash (1.1 Flash)</option>
+                  <option value="gemini-2.5-pro">🏆 Gemini 2.5 Pro (Deep Reasoning)</option>
                 </optgroup>
-                <optgroup label="⚡ Gemini 2.5 Family">
-                  <option value="gemini-2.5-pro">🏆 Gemini 2.5 Pro (Deep Reasoning & LaTeX)</option>
-                  <option value="gemini-2.5-flash">⚡ Gemini 2.5 Flash (Best Price-Performance)</option>
-                  <option value="gemini-2.5-flash-lite">🌱 Gemini 2.5 Flash-Lite (Budget-Friendly)</option>
-                </optgroup>
-                <optgroup label="⚡ Production Baseline">
-                  <option value="gemini-2.0-flash">⚡ Gemini 2.0 Flash (Stable Default)</option>
-                  <option value="gemini-1.5-pro">📑 Gemini 1.5 Pro</option>
+                <optgroup label="⚠️ Legacy (May 404 for new users)">
+                  <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                  <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
                 </optgroup>
               </Form.Select>
+              <div style={{ fontSize: "0.72rem", color: "#a5b1c2", marginTop: "4px" }}>
+                🛡️ Includes automatic 503 high-demand fallback across 3.8/3.5/3.6/4 endpoints.
+              </div>
             </Form.Group>
           </Col>
           <Col md={6}>

@@ -268,14 +268,22 @@ function AdminDashboard() {
 
   if (activeTab === "resume_studio") {
     return (
-      <div style={{ paddingTop: "75px" }}>
+      <div style={{
+        paddingTop: "68px",
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        background: "#0d0617",
+        overflow: "hidden",
+      }}>
         <div style={{
           background: "rgba(17, 10, 26, 0.98)",
           borderBottom: "1px solid rgba(192, 132, 245, 0.25)",
-          padding: "8px 20px",
+          padding: "6px 18px",
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "center"
+          alignItems: "center",
+          flexShrink: 0,
         }}>
           <div className="d-flex align-items-center gap-2">
             <Button
@@ -312,7 +320,9 @@ function AdminDashboard() {
           </Button>
         </div>
 
-        <ResumeStudio onBackToDashboard={() => setActiveTab("projects")} />
+        <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+          <ResumeStudio onBackToDashboard={() => setActiveTab("projects")} />
+        </div>
       </div>
     );
   }

@@ -31,7 +31,7 @@ function LatexEditor({
       const res = await axios.post(`${API_BASE}/ai/refine`, {
         currentLatex: content,
         instruction: refinePrompt,
-        modelChoice: localStorage.getItem("gemini_selected_model") || "gemini-2.5-flash",
+        modelChoice: localStorage.getItem("gemini_selected_model") || "gemini-3.8-flash",
         clientApiKey: apiKey,
       });
 
@@ -49,13 +49,16 @@ function LatexEditor({
   return (
     <div style={{
       height: "100%",
+      minHeight: 0,
       display: "flex",
       flexDirection: "column",
       background: "#1e1e1e",
       borderRight: "1px solid rgba(192, 132, 245, 0.2)",
+      overflow: "hidden",
     }}>
       {/* Editor Subheader */}
       <div style={{
+        flexShrink: 0,
         padding: "8px 14px",
         background: "#161616",
         borderBottom: "1px solid rgba(255,255,255,0.08)",
@@ -99,7 +102,7 @@ function LatexEditor({
       </div>
 
       {/* Monaco Code Editor */}
-      <div style={{ flex: 1, minHeight: 0 }}>
+      <div style={{ flex: 1, minHeight: 0, position: "relative", overflow: "hidden" }}>
         <Editor
           height="100%"
           language={isMarkdown ? "markdown" : "latex"}
@@ -123,9 +126,11 @@ function LatexEditor({
       {/* Bottom In-Line AI Refine Bar (Only in LaTeX mode) */}
       {!isMarkdown && (
         <div style={{
+          flexShrink: 0,
           background: "#161616",
           borderTop: "1px solid rgba(255,255,255,0.08)",
           padding: "8px 12px",
+          zIndex: 10,
         }}>
           {refineError && (
             <div style={{ color: "#ff6b6b", fontSize: "0.75rem", marginBottom: "4px" }}>

@@ -133,7 +133,7 @@ function ResumeStudio({ onBackToDashboard }) {
     try {
       const res = await axios.get(`${API_BASE}/resumes/${resumeId}`);
       const resume = res.data;
-      if (resume) {
+      if (resume && resume.latex_content) {
         setActiveFile(`resume:${resume.id}`);
         setCurrentResumeId(resume.id);
         setResumeTitle(resume.title);
@@ -141,9 +141,12 @@ function ResumeStudio({ onBackToDashboard }) {
         setTargetRole(resume.target_role || "");
         setLatexCode(resume.latex_content);
         compileLatex(resume.latex_content);
+      } else {
+        alert("Saved resume could not be loaded or has empty LaTeX content.");
       }
     } catch (err) {
       console.error("Failed to load resume:", err);
+      alert("Error loading saved resume: " + (err.response?.data?.error || err.message));
     }
   };
 
@@ -241,7 +244,9 @@ function ResumeStudio({ onBackToDashboard }) {
 
   return (
     <div style={{
-      height: "calc(100vh - 80px)",
+      height: "100%",
+      flex: 1,
+      minHeight: 0,
       display: "flex",
       flexDirection: "column",
       background: "#0d0617",
@@ -250,7 +255,8 @@ function ResumeStudio({ onBackToDashboard }) {
     }}>
       {/* TOP OVERLEAF-STYLE NAVBAR */}
       <div style={{
-        padding: "10px 18px",
+        flexShrink: 0,
+        padding: "8px 18px",
         background: "rgba(17, 10, 26, 0.95)",
         borderBottom: "1px solid rgba(192, 132, 245, 0.25)",
         display: "flex",

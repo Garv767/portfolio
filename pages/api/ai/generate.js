@@ -50,8 +50,7 @@ async function handler(req, res) {
 
     // 3. Initialize Gemini
     const genAI = new GoogleGenerativeAI(apiKey);
-    const selectedModel = modelChoice || "gemini-2.5-flash";
-    const model = genAI.getGenerativeModel({ model: selectedModel });
+    const requestedModel = modelChoice || "gemini-3.8-flash";
 
     const prompt = `You are an elite Tech Career Strategist and LaTeX Resume Architect.
 Your task is to craft an impeccably tailored, high-density, ATS-optimized 1-page software engineer resume in LaTeX matching the candidate to the target job description.
@@ -84,8 +83,43 @@ ${templateSkeleton}
 6. Keep the resume strictly formatted to fit on ONE page.
 `;
 
-    const result = await model.generateContent(prompt);
-    let outputText = result.response.text().trim();
+    // Resilient fallback order if the requested model returns 503 (high demand) or 404 (deprecated)
+    const fallbackList = [
+      requestedModel,
+      "gemini-3.8-flash",
+      "gemini-3.5-flash-lite",
+      "gemini-3.6-flash",
+      "gemini-4-argon",
+      "gemini-3.1-pro-preview",
+      "gemini-3.1-flash-lite"
+    ].filter((m, idx, arr) => arr.indexOf(m) === idx);
+
+    let outputText = "";
+    let lastError = null;
+    let successfulModel = requestedModel;
+
+    for (const modelName of fallbackList) {
+      try {
+        const model = genAI.getGenerativeModel({ model: modelName });
+        const result = await model.generateContent(prompt);
+        outputText = result.response.text().trim();
+        if (outputText) {
+          successfulModel = modelName;
+          lastError = null;
+          break;
+        }
+      } catch (err) {
+        lastError = err;
+        console.warn(`Model ${modelName} returned error: ${err.message}. Trying next fallback...`);
+        if (err.message && err.message.includes("API key not valid")) {
+          throw err;
+        }
+      }
+    }
+
+    if (!outputText && lastError) {
+      throw lastError;
+    }
 
     if (outputText.startsWith("```latex")) {
       outputText = outputText.replace(/^```latex\n?/, "").replace(/\n?```$/, "").trim();
@@ -93,7 +127,7 @@ ${templateSkeleton}
       outputText = outputText.replace(/^```[a-z]*\n?/, "").replace(/\n?```$/, "").trim();
     }
 
-    return res.json({ latex: outputText });
+    return res.json({ latex: outputText, modelUsed: successfulModel });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
