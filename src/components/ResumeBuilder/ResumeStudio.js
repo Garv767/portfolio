@@ -14,7 +14,7 @@ import PdfPreview from "./PdfPreview";
 import AiStudioModal from "./AiStudioModal";
 import { TEMPLATES, JAKE_RESUME_TEMPLATE } from "./templates";
 
-const API_BASE = "http://localhost:5001/api";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "/api";
 
 function ResumeStudio({ onBackToDashboard }) {
   // Active document state

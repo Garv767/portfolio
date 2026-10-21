@@ -3,7 +3,7 @@ import { Modal, Button, Form, Row, Col, Spinner, Alert, Badge } from "react-boot
 import { AiOutlineCloudUpload, AiOutlineThunderbolt, AiOutlineKey } from "react-icons/ai";
 import axios from "axios";
 
-const API_BASE = "http://localhost:5001/api";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "/api";
 
 function AiStudioModal({ show, onHide, onGenerated, currentLatexTemplate, templateKey }) {
   const [jdText, setJdText] = useState("");

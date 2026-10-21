@@ -2,7 +2,6 @@
   "name": "portfolio",
   "version": "0.1.0",
   "private": true,
-  "homepage": ".",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1154.0",
     "@aws-sdk/s3-request-presigner": "^3.1154.0",
@@ -19,11 +18,12 @@
     "cors": "^2.8.6",
     "express": "^5.3.0",
     "mammoth": "^1.13.0",
+    "next": "^14.2.35",
     "pdf-parse": "^2.4.5",
-    "react": "^17.0.2",
+    "react": "^18.3.1",
     "react-beautiful-dnd": "^13.1.1",
     "react-bootstrap": "^2.2.1",
-    "react-dom": "^17.0.2",
+    "react-dom": "^18.3.1",
     "react-github-calendar": "^3.2.2",
     "react-icons": "^4.8.0",
     "react-parallax-tilt": "^1.7.42",
@@ -36,14 +36,11 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
     "server": "node server/index.js",
-    "sync:neon": "node scripts/syncReposNeon.js",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build",
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "sync:neon": "node scripts/syncReposNeon.js"
   },
   "eslintConfig": {
     "extends": [
