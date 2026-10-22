@@ -25,8 +25,8 @@ export default async function handler(req, res) {
         for (const item of body) {
           if (item.repo_name) {
             await sql`
-              INSERT INTO portfolio_projects (repo_name, priority, updated_at)
-              VALUES (${item.repo_name}, ${item.priority ?? 0}, NOW())
+              INSERT INTO portfolio_projects (repo_name, display_title, priority, updated_at)
+              VALUES (${item.repo_name}, ${item.display_title || item.repo_name}, ${item.priority ?? 0}, NOW())
               ON CONFLICT (repo_name) DO UPDATE 
               SET priority = EXCLUDED.priority, updated_at = NOW()
             `;

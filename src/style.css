@@ -258,7 +258,7 @@ button:focus {
 }
 
 .home-header {
-  padding-top: 80px !important;
+  padding-top: 15px !important;
 }
 
 .home-section {
@@ -268,11 +268,11 @@ button:focus {
   background-position: top center;
   background-repeat: no-repeat;
   padding-bottom: 30px !important;
-  padding-top: 30px !important;
+  padding-top: 10px !important;
 }
 
 .home-content {
-  padding: 9rem 0 2rem !important;
+  padding: 4.5rem 0 2rem !important;
   color: whitesmoke;
   text-align: left;
 }

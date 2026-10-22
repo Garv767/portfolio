@@ -16,7 +16,7 @@ import { TEMPLATES, JAKE_RESUME_TEMPLATE } from "./templates";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "/api";
 
-function ResumeStudio({ onBackToDashboard }) {
+function ResumeStudio({ onBackToDashboard, initialResumeId }) {
   // Active document state
   const [activeFile, setActiveFile] = useState("template:jake-resume");
   const [latexCode, setLatexCode] = useState(JAKE_RESUME_TEMPLATE);
@@ -97,8 +97,8 @@ function ResumeStudio({ onBackToDashboard }) {
   const [compileDuration, setCompileDuration] = useState("");
 
   // Saving states
-  const [savingDb, setSavingDb] = useState(false);
-  const [savedDbSuccess, setSavedDbSuccess] = useState(false);
+  const [savingAction, setSavingAction] = useState(null); // 'save' | 'save_as' | null
+  const [savedSuccess, setSavedSuccess] = useState(null); // 'save' | 'save_as' | null
   const [savingS3, setSavingS3] = useState(false);
 
   // AI Modal
@@ -108,8 +108,12 @@ function ResumeStudio({ onBackToDashboard }) {
   useEffect(() => {
     fetchSavedResumes();
     fetchMasterContext();
-    compileLatex(JAKE_RESUME_TEMPLATE);
-  }, []);
+    if (initialResumeId) {
+      handleSelectResume(initialResumeId);
+    } else {
+      compileLatex(JAKE_RESUME_TEMPLATE);
+    }
+  }, [initialResumeId]);
 
   const fetchSavedResumes = async () => {
     try {
@@ -210,16 +214,33 @@ function ResumeStudio({ onBackToDashboard }) {
     }
   };
 
-  const handleSaveToNeon = async () => {
+  /**
+   * Save (overwrite current) or Save As (create new record)
+   */
+  const handleSave = async (isSaveAs = false) => {
     if (!latexCode.trim()) return;
 
-    setSavingDb(true);
-    setSavedDbSuccess(false);
+    let targetTitle = resumeTitle;
+    let targetId = currentResumeId;
+
+    if (isSaveAs) {
+      const defaultNewTitle = resumeTitle.endsWith(".tex") 
+        ? resumeTitle.replace(/\.tex$/i, "_Copy.tex") 
+        : `${resumeTitle}_Copy.tex`;
+      const prompted = window.prompt("Save As (Enter new resume name):", defaultNewTitle);
+      if (!prompted || !prompted.trim()) return;
+      targetTitle = prompted.trim();
+      targetId = null; // Forces creation of brand new record in DB + S3
+    }
+
+    const actionKey = isSaveAs ? "save_as" : "save";
+    setSavingAction(actionKey);
+    setSavedSuccess(null);
 
     try {
       const payload = {
-        id: currentResumeId,
-        title: resumeTitle,
+        id: targetId,
+        title: targetTitle,
         target_company: targetCompany,
         target_role: targetRole,
         template_name: activeFile.startsWith("template:") ? activeFile.replace("template:", "") : "custom",
@@ -228,15 +249,16 @@ function ResumeStudio({ onBackToDashboard }) {
 
       const res = await axios.post(`${API_BASE}/resumes`, payload);
       setCurrentResumeId(res.data.id);
+      setResumeTitle(targetTitle);
       setActiveFile(`resume:${res.data.id}`);
-      setSavedDbSuccess(true);
+      setSavedSuccess(actionKey);
       fetchSavedResumes();
 
-      setTimeout(() => setSavedDbSuccess(false), 2500);
+      setTimeout(() => setSavedSuccess(null), 3000);
     } catch (err) {
       alert("Failed to save resume: " + (err.response?.data?.error || err.message));
     } finally {
-      setSavingDb(false);
+      setSavingAction(null);
     }
   };
 
@@ -395,23 +417,25 @@ function ResumeStudio({ onBackToDashboard }) {
                 <AiOutlineThunderbolt /> AI Resume Studio
               </Button>
 
+              {/* Save (Overwrite) */}
               <Button
                 size="sm"
-                variant={savedDbSuccess ? "success" : "outline-primary"}
-                onClick={handleSaveToNeon}
-                disabled={savingDb}
+                variant={savedSuccess === "save" ? "success" : "outline-primary"}
+                onClick={() => handleSave(false)}
+                disabled={savingAction !== null}
                 style={{
                   fontSize: "0.82rem",
                   padding: "5px 14px",
-                  borderColor: savedDbSuccess ? "#28a745" : "rgba(192,132,245,0.5)",
-                  color: savedDbSuccess ? "#fff" : "#c084f5",
+                  borderColor: savedSuccess === "save" ? "#28a745" : "rgba(192,132,245,0.5)",
+                  color: savedSuccess === "save" ? "#fff" : "#c084f5",
                 }}
+                title={currentResumeId ? "Overwrite current saved resume" : "Save resume"}
               >
-                {savingDb ? (
+                {savingAction === "save" ? (
                   <>
                     <Spinner animation="border" size="sm" className="me-1" /> Saving...
                   </>
-                ) : savedDbSuccess ? (
+                ) : savedSuccess === "save" ? (
                   <>
                     <AiOutlineCheck className="me-1" /> Saved
                   </>
@@ -419,6 +443,33 @@ function ResumeStudio({ onBackToDashboard }) {
                   <>
                     <AiOutlineSave className="me-1" /> Save
                   </>
+                )}
+              </Button>
+
+              {/* Save As (Create New Record) */}
+              <Button
+                size="sm"
+                variant={savedSuccess === "save_as" ? "success" : "outline-secondary"}
+                onClick={() => handleSave(true)}
+                disabled={savingAction !== null}
+                style={{
+                  fontSize: "0.82rem",
+                  padding: "5px 14px",
+                  borderColor: savedSuccess === "save_as" ? "#28a745" : "rgba(255,255,255,0.25)",
+                  color: savedSuccess === "save_as" ? "#fff" : "rgba(255,255,255,0.85)",
+                }}
+                title="Create a new copy / new record in Neon database"
+              >
+                {savingAction === "save_as" ? (
+                  <>
+                    <Spinner animation="border" size="sm" className="me-1" /> Saving...
+                  </>
+                ) : savedSuccess === "save_as" ? (
+                  <>
+                    <AiOutlineCheck className="me-1" /> Saved As New
+                  </>
+                ) : (
+                  "Save As..."
                 )}
               </Button>
             </>

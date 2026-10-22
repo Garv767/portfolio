@@ -20,9 +20,12 @@ function Github() {
         blockMargin={10}
         fontSize={20}
         theme={{
-          dark: ["#161b22", "#7c3aed", "#9333ea", "#a855f7", "#c084f5"],
+          level0: "hsla(191, 85%, 11%, 0.92)",
+          level1: "hsla(191, 85%, 11%, 0.76)",
+          level2: "hsla(191, 85%, 11%, 0.6)",
+          level3: "hsla(191, 85%, 11%, 0.44)",
+          level4: "hsl(0, 0%, 92%)",
         }}
-        colorScheme="dark"
       />
     </Row>
   );

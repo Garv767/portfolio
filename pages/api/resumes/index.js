@@ -20,7 +20,7 @@ async function handler(req, res) {
     try {
       const sql = neon(dbUrl);
       const rows = await sql`
-        SELECT id, title, target_company, target_role, template_name, s3_key, updated_at
+        SELECT id, title, target_company, target_role, template_name, s3_key, is_published, updated_at
         FROM public.resumes
         ORDER BY updated_at DESC
       `;

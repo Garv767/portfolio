@@ -4,9 +4,10 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import axios from "axios";
 import Particle from "../Particle";
 import { CgWebsite } from "react-icons/cg";
-import { AiOutlineEye, AiOutlineEyeInvisible, AiOutlineSave, AiOutlineLogout, AiOutlineCheck, AiOutlineDown, AiOutlineRight, AiOutlineThunderbolt, AiOutlineAppstore } from "react-icons/ai";
+import { AiOutlineEye, AiOutlineEyeInvisible, AiOutlineSave, AiOutlineLogout, AiOutlineCheck, AiOutlineDown, AiOutlineRight, AiOutlineThunderbolt, AiOutlineAppstore, AiOutlineGlobal } from "react-icons/ai";
 import { useRouter } from "next/router";
 import ResumeStudio from "../ResumeBuilder/ResumeStudio";
+import ResumeDisplay from "./ResumeDisplay";
 
 const GITHUB_USERNAME = "garv767";
 
@@ -23,7 +24,8 @@ const DragHandleIcon = () => (
 );
 
 function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState("resume_studio"); // 'resume_studio' | 'projects'
+  const [activeTab, setActiveTab] = useState("projects"); // 'projects' | 'resume_display' | 'resume_studio'
+  const [selectedResumeId, setSelectedResumeId] = useState(null);
   const [repos, setRepos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedRepos, setExpandedRepos] = useState({});
@@ -177,6 +179,7 @@ function AdminDashboard() {
 
     const updates = updatedItems.map((item) => ({
       repo_name: item.repo_name,
+      display_title: item.display_title || item.repo_name,
       priority: item.priority,
     }));
     try {
@@ -266,6 +269,81 @@ function AdminDashboard() {
     border: `1px solid ${hasOverride ? "rgba(192,132,245,0.4)" : "rgba(255,255,255,0.15)"}`,
   });
 
+  const renderTabBar = () => (
+    <div style={{
+      background: "rgba(17, 10, 26, 0.98)",
+      borderBottom: "1px solid rgba(192, 132, 245, 0.25)",
+      padding: "8px 20px",
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      flexShrink: 0,
+      position: "sticky",
+      top: "68px",
+      zIndex: 100,
+    }}>
+      <div className="d-flex align-items-center gap-2">
+        <Button
+          size="sm"
+          variant={activeTab === "projects" ? "primary" : "outline-secondary"}
+          onClick={() => setActiveTab("projects")}
+          style={{
+            fontWeight: "600",
+            fontSize: "0.85rem",
+            background: activeTab === "projects" ? "#623686" : "transparent",
+            borderColor: activeTab === "projects" ? "#623686" : "rgba(255,255,255,0.2)",
+            color: "#fff",
+          }}
+        >
+          <AiOutlineAppstore className="me-1" /> Project Management
+        </Button>
+
+        <Button
+          size="sm"
+          variant={activeTab === "resume_display" ? "primary" : "outline-secondary"}
+          onClick={() => setActiveTab("resume_display")}
+          style={{
+            fontWeight: "600",
+            fontSize: "0.85rem",
+            background: activeTab === "resume_display" ? "#623686" : "transparent",
+            borderColor: activeTab === "resume_display" ? "#623686" : "rgba(255,255,255,0.2)",
+            color: "#fff",
+          }}
+        >
+          <AiOutlineGlobal className="me-1" /> Resume Display
+        </Button>
+
+        <Button
+          size="sm"
+          variant={activeTab === "resume_studio" ? "primary" : "outline-secondary"}
+          onClick={() => {
+            setSelectedResumeId(null);
+            setActiveTab("resume_studio");
+          }}
+          style={{
+            fontWeight: "600",
+            fontSize: "0.85rem",
+            background: activeTab === "resume_studio" ? "linear-gradient(135deg, #8a2be2 0%, #4a00e0 100%)" : "transparent",
+            border: activeTab === "resume_studio" ? "none" : "1px solid rgba(192,132,245,0.4)",
+            color: activeTab === "resume_studio" ? "#fff" : "#c084f5",
+          }}
+        >
+          <AiOutlineThunderbolt className="me-1" /> AI Resume Studio
+        </Button>
+      </div>
+
+      <Button
+        size="sm"
+        id="logout-button"
+        variant="outline-danger"
+        onClick={handleLogout}
+        style={{ fontSize: "0.8rem" }}
+      >
+        <AiOutlineLogout /> Logout
+      </Button>
+    </div>
+  );
+
   if (activeTab === "resume_studio") {
     return (
       <div style={{
@@ -276,103 +354,47 @@ function AdminDashboard() {
         background: "#0d0617",
         overflow: "hidden",
       }}>
-        <div style={{
-          background: "rgba(17, 10, 26, 0.98)",
-          borderBottom: "1px solid rgba(192, 132, 245, 0.25)",
-          padding: "6px 18px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexShrink: 0,
-        }}>
-          <div className="d-flex align-items-center gap-2">
-            <Button
-              size="sm"
-              variant="primary"
-              onClick={() => setActiveTab("resume_studio")}
-              style={{
-                background: "linear-gradient(135deg, #8a2be2 0%, #4a00e0 100%)",
-                border: "none",
-                fontWeight: "600",
-                fontSize: "0.82rem",
-              }}
-            >
-              <AiOutlineThunderbolt /> AI Resume Studio
-            </Button>
-            <Button
-              size="sm"
-              variant="outline-secondary"
-              onClick={() => setActiveTab("projects")}
-              style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.7)" }}
-            >
-              <AiOutlineAppstore /> Projects Management
-            </Button>
-          </div>
-
-          <Button
-            size="sm"
-            id="logout-button"
-            variant="outline-danger"
-            onClick={handleLogout}
-            style={{ fontSize: "0.8rem" }}
-          >
-            <AiOutlineLogout /> Logout
-          </Button>
-        </div>
-
+        {renderTabBar()}
         <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
-          <ResumeStudio onBackToDashboard={() => setActiveTab("projects")} />
+          <ResumeStudio 
+            initialResumeId={selectedResumeId}
+            onBackToDashboard={() => setActiveTab("projects")} 
+          />
         </div>
       </div>
     );
   }
 
-  return (
-    <Container fluid className="about-section" style={{ paddingTop: "100px", paddingBottom: "60px" }}>
-      <Particle />
-      <Container>
-        {/* Top Tab Switcher in Projects View */}
-        <div className="d-flex justify-content-between align-items-center mb-4 pb-2" style={{ borderBottom: "1px solid rgba(192, 132, 245, 0.2)" }}>
-          <div className="d-flex align-items-center gap-2">
-            <Button
-              size="sm"
-              variant="outline-primary"
-              onClick={() => setActiveTab("resume_studio")}
-              style={{
-                borderColor: "rgba(192,132,245,0.4)",
-                color: "#c084f5",
-                fontWeight: "600",
-                fontSize: "0.85rem",
-              }}
-            >
-              <AiOutlineThunderbolt /> Switch to AI Resume Studio
-            </Button>
-            <Button
-              size="sm"
-              variant="primary"
-              style={{
-                background: "#623686",
-                borderColor: "#623686",
-                fontWeight: "600",
-                fontSize: "0.85rem",
-              }}
-            >
-              <AiOutlineAppstore /> Projects Management
-            </Button>
-          </div>
-
-          <Button 
-            id="logout-button"
-            variant="outline-danger" 
-            size="sm"
-            onClick={() => {
-              console.log("Logout button component clicked");
-              handleLogout();
+  if (activeTab === "resume_display") {
+    return (
+      <div style={{
+        paddingTop: "68px",
+        minHeight: "100vh",
+        background: "#0d0617",
+      }}>
+        <Particle />
+        {renderTabBar()}
+        <Container style={{ paddingTop: "24px", paddingBottom: "60px" }}>
+          <ResumeDisplay 
+            onOpenStudioWithResume={(id) => {
+              setSelectedResumeId(id);
+              setActiveTab("resume_studio");
             }}
-          >
-            <AiOutlineLogout /> Logout
-          </Button>
-        </div>
+            onSwitchToStudio={() => {
+              setSelectedResumeId(null);
+              setActiveTab("resume_studio");
+            }}
+          />
+        </Container>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ paddingTop: "68px", minHeight: "100vh", background: "#0d0617" }}>
+      <Particle />
+      {renderTabBar()}
+      <Container style={{ paddingTop: "24px", paddingBottom: "60px" }}>
 
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h1 className="project-heading" style={{ margin: 0 }}>
@@ -616,7 +638,7 @@ function AdminDashboard() {
           </DragDropContext>
         )}
       </Container>
-    </Container>
+    </div>
   );
 }
 
