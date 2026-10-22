@@ -278,8 +278,8 @@ function AdminDashboard() {
       justifyContent: "space-between",
       alignItems: "center",
       flexShrink: 0,
-      position: "sticky",
-      top: "68px",
+      position: activeTab === "resume_studio" ? "relative" : "sticky",
+      top: activeTab === "resume_studio" ? 0 : "68px",
       zIndex: 100,
     }}>
       <div className="d-flex align-items-center gap-2">

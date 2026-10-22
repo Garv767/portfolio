@@ -19,17 +19,25 @@ const useProjects = () => {
         );
         const ghRepos = ghResponse.data;
 
-        // 2. Fetch Neon DB Configs
-        const dbRes = await axios.get("/api/projects").catch(() => ({ data: [] }));
+        // 2. Fetch Neon DB Configs with cache busting
+        const dbRes = await axios
+          .get(`/api/projects?t=${Date.now()}`, {
+            headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
+          })
+          .catch(() => ({ data: [] }));
         const dbConfigs = Array.isArray(dbRes.data) ? dbRes.data : [];
 
         // 3. Merge: Neon DB overrides take priority over GitHub data
         const configMap = new Map();
-        dbConfigs.forEach((c) => configMap.set(c.repo_name, c));
+        dbConfigs.forEach((c) => {
+          if (c.repo_name) {
+            configMap.set(c.repo_name.toLowerCase(), c);
+          }
+        });
 
         const merged = ghRepos
           .map((repo) => {
-            const config = configMap.get(repo.name);
+            const config = configMap.get(repo.name.toLowerCase());
 
             // Hide if explicitly marked not visible in admin
             if (config && config.is_visible === false) return null;
@@ -40,6 +48,11 @@ const useProjects = () => {
 
             // demo_url: admin override → GitHub homepage → nothing
             const demoLink = config?.demo_url || repo.homepage || "";
+
+            const priorityNum =
+              config?.priority !== undefined && config?.priority !== null && !isNaN(config.priority)
+                ? Number(config.priority)
+                : 999;
 
             return {
               id: repo.id,
@@ -57,7 +70,7 @@ const useProjects = () => {
               stars: repo.stargazers_count,
               forks: repo.forks_count,
               language: repo.language,
-              priority: config?.priority ?? 999,
+              priority: priorityNum,
               updatedAt: new Date(repo.updated_at),
             };
           })

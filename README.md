@@ -9,28 +9,21 @@
 </p>
 
 <p align="center">
-  <a href="https://garvrahut.tech" target="_blank">
-    <strong>🌐 Live Domain: garvrahut.tech</strong>
+  <a href="https://garv.is-a.dev" target="_blank">
+    <strong>🌐 Live Domain: garv.is-a.dev</strong>
+  </a>
+  &nbsp;|&nbsp;
+  <a href="https://garv767.is-a.dev" target="_blank">
+    <strong>garv767.is-a.dev</strong>
   </a>
 </p>
 
 <div align="center">
 
-[![Live Site](https://img.shields.io/badge/Live_Site-garvrahut.tech-623686?style=for-the-badge&logo=google-chrome&logoColor=white)](https://garvrahut.tech)
+[![Live Site](https://img.shields.io/badge/Live_Site-garv.is--a.dev-623686?style=for-the-badge&logo=google-chrome&logoColor=white)](https://garv.is-a.dev)
 [![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
 [![Neon Database](https://img.shields.io/badge/Neon-PostgreSQL_%26_S3-00E599?style=for-the-badge&logo=postgresql&logoColor=black)](https://neon.tech/)
 
-</div>
-
----
-
-## 📸 Admin Project Management (Accordion View)
-
-Easily manage repository visibility, custom titles, live URLs, custom thumbnails, and priority ranking using fluid drag-and-drop reordering with accordion controls:
-
-<div align="center">
-  <img src="./public/admin-accordion.png" alt="Admin Dashboard Accordion and Drag-and-Drop Management" width="850" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);" />
 </div>
 
 ---
@@ -42,24 +35,58 @@ Easily manage repository visibility, custom titles, live URLs, custom thumbnails
 - **Accordion Control:** Fine-tune custom titles, override live demo links (or fallback automatically to GitHub repo homepages), and attach custom social previews.
 - **Neon PostgreSQL Sync:** Syncs GitHub repos directly to Neon PostgreSQL, preserving visibility and custom metadata.
 
+<details>
+<summary><b>📸 View Feature Screenshot: Project Management & Accordion Controls</b></summary>
+
+<br>
+
+<div align="center">
+  <img src="public/admin-accordion.png" alt="Admin Dashboard Accordion and Drag-and-Drop Management" width="850" />
+</div>
+
+</details>
+
+---
+
 ### 2. 📄 Dynamic Public Resume Display
 - **Admin Resume Selector:** Rather than hardcoding static PDFs in `public/`, the admin selects which saved resume from Neon database to publish.
 - **Live PDF Compilation & Serving:** Automatically serves and streams the compiled PDF on `/resume` via dynamic API (`/api/resumes/published-pdf`).
 
+<details>
+<summary><b>📸 View Feature Screenshot: Public Resume Display Selector</b></summary>
+
+<br>
+
+<div align="center">
+  <img src="public/resume-display-feature.png" alt="Resume Display Selector" width="850" />
+</div>
+
+</details>
+
+---
+
 ### 3. ⚡ AI Resume Studio
 - **Overleaf-Style 3-Panel IDE:** Resizable split panels for **Files / Master Context**, **LaTeX Monaco Editor**, and **Live PDF Preview**.
-- **Save & Save As:** Overwrite existing resume records or create distinct versions with a single click.
+- **Save & Save As:** Overwrite existing resume records or create distinct versions with a dropdown.
 - **Neon S3 + PostgreSQL:** Stores raw `.tex` source documents securely in Neon S3 storage with metadata indexed in PostgreSQL.
 - **AI Tailoring:** Uses Google Gemini to analyze Master Context and target Job Descriptions, crafting ATS-optimized LaTeX resumes.
 
-### 4. 📊 Inverted GitHub Activity Heat Map
-- About page features an activity heat map from GitHub with an inverted, high-contrast theme suited for dark mode.
+<details>
+<summary><b>📸 View Feature Screenshot: AI Resume Studio & LaTeX Editor</b></summary>
+
+<br>
+
+<div align="center">
+  <img src="public/resume-studio-feature.png" alt="AI Resume Studio" width="850" />
+</div>
+
+</details>
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Framework:** [Next.js](https://nextjs.org/) (React 18)
+- **Framework:** [Next.js](https://nextjs.org/)
 - **Database:** [Neon Serverless PostgreSQL](https://neon.tech/)
 - **Object Storage:** [Neon S3 Bucket](https://neon.tech/) (AWS S3 SDK)
 - **LaTeX Compilation:** Local Tectonic & Cloud PDFLaTeX engines
@@ -112,6 +139,6 @@ Open [http://localhost:3000](http://localhost:3000) to view the portfolio.
 
 ## 🌐 Live Deployment
 
-The portfolio is deployed with custom domain support:
-- **Primary Domain:** [https://garvrahut.tech](https://garvrahut.tech)
-- **GitHub Pages:** [https://garv767.github.io](https://garv767.github.io)
+The portfolio is deployed live at:
+- **Primary Domain:** [https://garv.is-a.dev](https://garv.is-a.dev)
+- **Mirror Domain:** [https://garv767.is-a.dev](https://garv767.is-a.dev)

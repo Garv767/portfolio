@@ -4,6 +4,10 @@ export default async function handler(req, res) {
   try {
     const sql = getDb();
 
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+
     if (req.method === "GET") {
       const projects = await sql`SELECT * FROM portfolio_projects ORDER BY priority ASC`;
       return res.json(projects);
@@ -22,16 +26,17 @@ export default async function handler(req, res) {
 
       // Batch update (e.g. priorities after drag-and-drop)
       if (Array.isArray(body)) {
-        for (const item of body) {
-          if (item.repo_name) {
-            await sql`
+        await Promise.all(
+          body.map((item) => {
+            if (!item.repo_name) return null;
+            return sql`
               INSERT INTO portfolio_projects (repo_name, display_title, priority, updated_at)
               VALUES (${item.repo_name}, ${item.display_title || item.repo_name}, ${item.priority ?? 0}, NOW())
               ON CONFLICT (repo_name) DO UPDATE 
               SET priority = EXCLUDED.priority, updated_at = NOW()
             `;
-          }
-        }
+          })
+        );
         return res.json({ success: true, count: body.length });
       }
 

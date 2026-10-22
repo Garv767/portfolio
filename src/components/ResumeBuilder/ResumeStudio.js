@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Button, Form, Badge, Spinner } from "react-bootstrap";
+import { Button, Form, Badge, Spinner, Dropdown, ButtonGroup } from "react-bootstrap";
 import { 
   AiOutlineThunderbolt, 
   AiOutlineSave, 
@@ -25,6 +25,7 @@ function ResumeStudio({ onBackToDashboard, initialResumeId }) {
   const [targetCompany, setTargetCompany] = useState("");
   const [targetRole, setTargetRole] = useState("");
   const [currentResumeId, setCurrentResumeId] = useState(null);
+  const [saveAsName, setSaveAsName] = useState("");
 
   // Resizable panel dimensions
   const [filePanelWidth, setFilePanelWidth] = useState(() => {
@@ -201,6 +202,7 @@ function ResumeStudio({ onBackToDashboard, initialResumeId }) {
         setActiveFile(`resume:${resume.id}`);
         setCurrentResumeId(resume.id);
         setResumeTitle(resume.title);
+        setSaveAsName(resume.title.endsWith(".tex") ? resume.title.replace(/\.tex$/i, "_Copy.tex") : `${resume.title}_Copy.tex`);
         setTargetCompany(resume.target_company || "");
         setTargetRole(resume.target_role || "");
         setLatexCode(resume.latex_content);
@@ -217,19 +219,17 @@ function ResumeStudio({ onBackToDashboard, initialResumeId }) {
   /**
    * Save (overwrite current) or Save As (create new record)
    */
-  const handleSave = async (isSaveAs = false) => {
+  const handleSave = async (isSaveAs = false, customSaveAsTitle = null) => {
     if (!latexCode.trim()) return;
 
     let targetTitle = resumeTitle;
     let targetId = currentResumeId;
 
     if (isSaveAs) {
-      const defaultNewTitle = resumeTitle.endsWith(".tex") 
-        ? resumeTitle.replace(/\.tex$/i, "_Copy.tex") 
-        : `${resumeTitle}_Copy.tex`;
-      const prompted = window.prompt("Save As (Enter new resume name):", defaultNewTitle);
-      if (!prompted || !prompted.trim()) return;
-      targetTitle = prompted.trim();
+      targetTitle = (customSaveAsTitle && customSaveAsTitle.trim()) 
+        ? customSaveAsTitle.trim() 
+        : (saveAsName.trim() || `${resumeTitle.replace(/\.tex$/i, "")}_Copy.tex`);
+      if (!targetTitle.endsWith(".tex")) targetTitle += ".tex";
       targetId = null; // Forces creation of brand new record in DB + S3
     }
 
@@ -250,6 +250,7 @@ function ResumeStudio({ onBackToDashboard, initialResumeId }) {
       const res = await axios.post(`${API_BASE}/resumes`, payload);
       setCurrentResumeId(res.data.id);
       setResumeTitle(targetTitle);
+      setSaveAsName(targetTitle.endsWith(".tex") ? targetTitle.replace(/\.tex$/i, "_Copy.tex") : `${targetTitle}_Copy.tex`);
       setActiveFile(`resume:${res.data.id}`);
       setSavedSuccess(actionKey);
       fetchSavedResumes();
@@ -346,19 +347,8 @@ function ResumeStudio({ onBackToDashboard, initialResumeId }) {
         justifyContent: "space-between",
         gap: "12px",
       }}>
-        {/* Left: Back & Title input */}
+        {/* Left: Title input */}
         <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: 1 }}>
-          {onBackToDashboard && (
-            <Button
-              size="sm"
-              variant="outline-secondary"
-              onClick={onBackToDashboard}
-              style={{ fontSize: "0.8rem", padding: "4px 8px" }}
-              title="Return to Projects Management"
-            >
-              <AiOutlineArrowLeft /> Projects
-            </Button>
-          )}
 
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <span style={{ color: "#c084f5", fontWeight: "bold", fontSize: "1.05rem", whiteSpace: "nowrap" }}>
@@ -417,61 +407,136 @@ function ResumeStudio({ onBackToDashboard, initialResumeId }) {
                 <AiOutlineThunderbolt /> AI Resume Studio
               </Button>
 
-              {/* Save (Overwrite) */}
-              <Button
-                size="sm"
-                variant={savedSuccess === "save" ? "success" : "outline-primary"}
-                onClick={() => handleSave(false)}
-                disabled={savingAction !== null}
-                style={{
-                  fontSize: "0.82rem",
-                  padding: "5px 14px",
-                  borderColor: savedSuccess === "save" ? "#28a745" : "rgba(192,132,245,0.5)",
-                  color: savedSuccess === "save" ? "#fff" : "#c084f5",
-                }}
-                title={currentResumeId ? "Overwrite current saved resume" : "Save resume"}
-              >
-                {savingAction === "save" ? (
-                  <>
-                    <Spinner animation="border" size="sm" className="me-1" /> Saving...
-                  </>
-                ) : savedSuccess === "save" ? (
-                  <>
-                    <AiOutlineCheck className="me-1" /> Saved
-                  </>
-                ) : (
-                  <>
-                    <AiOutlineSave className="me-1" /> Save
-                  </>
-                )}
-              </Button>
+              {/* When editing a template or new resume (not yet saved), show ONLY Save button */}
+              {!currentResumeId ? (
+                <Button
+                  size="sm"
+                  variant={savedSuccess === "save" ? "success" : "outline-primary"}
+                  onClick={() => handleSave(false)}
+                  disabled={savingAction !== null}
+                  style={{
+                    fontSize: "0.82rem",
+                    padding: "5px 14px",
+                    borderColor: savedSuccess === "save" ? "#28a745" : "rgba(192,132,245,0.5)",
+                    color: savedSuccess === "save" ? "#fff" : "#c084f5",
+                  }}
+                  title="Save resume to database"
+                >
+                  {savingAction === "save" ? (
+                    <>
+                      <Spinner animation="border" size="sm" className="me-1" /> Saving...
+                    </>
+                  ) : savedSuccess === "save" ? (
+                    <>
+                      <AiOutlineCheck className="me-1" /> Saved
+                    </>
+                  ) : (
+                    <>
+                      <AiOutlineSave className="me-1" /> Save
+                    </>
+                  )}
+                </Button>
+              ) : (
+                /* When editing an already saved resume, show Save with a dropdown arrow for Save As */
+                <Dropdown as={ButtonGroup} size="sm">
+                  <Button
+                    size="sm"
+                    variant={savedSuccess === "save" ? "success" : "outline-primary"}
+                    onClick={() => handleSave(false)}
+                    disabled={savingAction !== null}
+                    style={{
+                      fontSize: "0.82rem",
+                      padding: "5px 14px",
+                      borderColor: savedSuccess === "save" ? "#28a745" : "rgba(192,132,245,0.5)",
+                      color: savedSuccess === "save" ? "#fff" : "#c084f5",
+                    }}
+                    title="Overwrite current saved resume"
+                  >
+                    {savingAction === "save" ? (
+                      <>
+                        <Spinner animation="border" size="sm" className="me-1" /> Saving...
+                      </>
+                    ) : savedSuccess === "save" ? (
+                      <>
+                        <AiOutlineCheck className="me-1" /> Saved
+                      </>
+                    ) : (
+                      <>
+                        <AiOutlineSave className="me-1" /> Save
+                      </>
+                    )}
+                  </Button>
 
-              {/* Save As (Create New Record) */}
-              <Button
-                size="sm"
-                variant={savedSuccess === "save_as" ? "success" : "outline-secondary"}
-                onClick={() => handleSave(true)}
-                disabled={savingAction !== null}
-                style={{
-                  fontSize: "0.82rem",
-                  padding: "5px 14px",
-                  borderColor: savedSuccess === "save_as" ? "#28a745" : "rgba(255,255,255,0.25)",
-                  color: savedSuccess === "save_as" ? "#fff" : "rgba(255,255,255,0.85)",
-                }}
-                title="Create a new copy / new record in Neon database"
-              >
-                {savingAction === "save_as" ? (
-                  <>
-                    <Spinner animation="border" size="sm" className="me-1" /> Saving...
-                  </>
-                ) : savedSuccess === "save_as" ? (
-                  <>
-                    <AiOutlineCheck className="me-1" /> Saved As New
-                  </>
-                ) : (
-                  "Save As..."
-                )}
-              </Button>
+                  <Dropdown.Toggle
+                    split
+                    variant={savedSuccess === "save_as" ? "success" : "outline-primary"}
+                    id="save-as-dropdown-toggle"
+                    disabled={savingAction !== null}
+                    style={{
+                      padding: "5px 8px",
+                      borderColor: savedSuccess === "save_as" ? "#28a745" : "rgba(192,132,245,0.5)",
+                      color: savedSuccess === "save_as" ? "#fff" : "#c084f5",
+                    }}
+                    title="Save As Options"
+                  />
+
+                  <Dropdown.Menu
+                    align="end"
+                    style={{
+                      background: "#160d29",
+                      border: "1px solid rgba(192,132,245,0.35)",
+                      borderRadius: "8px",
+                      padding: "14px",
+                      minWidth: "270px",
+                      boxShadow: "0 8px 25px rgba(0,0,0,0.6)",
+                      zIndex: 1050,
+                    }}
+                  >
+                    <div style={{ color: "#c084f5", fontSize: "0.8rem", fontWeight: "700", marginBottom: "8px" }}>
+                      Save As New Resume
+                    </div>
+                    <Form.Control
+                      size="sm"
+                      type="text"
+                      value={saveAsName}
+                      onChange={(e) => setSaveAsName(e.target.value)}
+                      placeholder="e.g. Resume_Copy.tex"
+                      style={{
+                        background: "rgba(255,255,255,0.08)",
+                        border: "1px solid rgba(192,132,245,0.3)",
+                        color: "#fff",
+                        fontSize: "0.82rem",
+                        marginBottom: "10px",
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleSave(true, saveAsName);
+                        }
+                      }}
+                    />
+                    <Button
+                      size="sm"
+                      variant="success"
+                      onClick={() => handleSave(true, saveAsName)}
+                      disabled={savingAction !== null || !saveAsName.trim()}
+                      style={{ width: "100%", fontSize: "0.8rem", fontWeight: "600" }}
+                    >
+                      {savingAction === "save_as" ? (
+                        <>
+                          <Spinner animation="border" size="sm" className="me-1" /> Saving New...
+                        </>
+                      ) : savedSuccess === "save_as" ? (
+                        <>
+                          <AiOutlineCheck className="me-1" /> Saved As New!
+                        </>
+                      ) : (
+                        "Save As New Record"
+                      )}
+                    </Button>
+                  </Dropdown.Menu>
+                </Dropdown>
+              )}
             </>
           )}
 

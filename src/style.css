@@ -40,12 +40,8 @@ button:focus {
 
 #preloader-none {
   opacity: 0;
+  display: none !important;
 }
-
-/* #preloader-none {
-  opacity: 0;
-  display: none;
-} */
 
 #no-scroll {
   overflow: hidden;
@@ -263,7 +259,7 @@ button:focus {
 
 .home-section {
   position: relative;
-  z-index: -1;
+  z-index: 1;
   /* background-image: var(--image-gradient), url(./Assets/home-bg.jpg); */
   background-position: top center;
   background-repeat: no-repeat;
@@ -332,7 +328,7 @@ button:focus {
 
 .home-about-description {
   color: white !important;
-  padding-top: 100px !important;
+  padding-top: 30px !important;
   padding-bottom: 20px !important;
   text-align: center;
 }

@@ -18,6 +18,7 @@ function ResumeNew() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       setWidth(window.innerWidth);
+      setPdfUrl(`/api/resumes/published-pdf?v=${Date.now()}`);
     }
   }, []);
 
@@ -27,9 +28,8 @@ function ResumeNew() {
   };
 
   const handleDocumentLoadError = (err) => {
-    console.warn("Failed to load dynamic PDF from /api/resumes/published-pdf, falling back to static:", err);
+    console.error("Failed to load dynamic PDF from /api/resumes/published-pdf:", err);
     setLoadError(true);
-    setPdfUrl("/GARV_RAHUT_resume.pdf");
   };
 
   return (
@@ -50,20 +50,26 @@ function ResumeNew() {
         </Row>
 
         <Row className="resume">
-          <Document
-            file={pdfUrl}
-            onLoadSuccess={handleDocumentLoadSuccess}
-            onLoadError={handleDocumentLoadError}
-            loading={
-              <div className="text-center p-5">
-                <Spinner animation="border" variant="primary" />
-                <p style={{ color: "#c084f5", marginTop: "12px" }}>Rendering Resume...</p>
-              </div>
-            }
-            className="d-flex justify-content-center"
-          >
-            <Page pageNumber={1} scale={width > 786 ? 1.7 : 0.6} />
-          </Document>
+          {loadError ? (
+            <div className="text-center p-5">
+              <p style={{ color: "#ff6b6b" }}>Unable to load resume preview. Please use the Download CV button above to view directly.</p>
+            </div>
+          ) : (
+            <Document
+              file={pdfUrl}
+              onLoadSuccess={handleDocumentLoadSuccess}
+              onLoadError={handleDocumentLoadError}
+              loading={
+                <div className="text-center p-5">
+                  <Spinner animation="border" variant="primary" />
+                  <p style={{ color: "#c084f5", marginTop: "12px" }}>Rendering Resume...</p>
+                </div>
+              }
+              className="d-flex justify-content-center"
+            >
+              <Page pageNumber={1} scale={width > 786 ? 1.7 : 0.6} />
+            </Document>
+          )}
         </Row>
 
         <Row style={{ justifyContent: "center", position: "relative" }}>

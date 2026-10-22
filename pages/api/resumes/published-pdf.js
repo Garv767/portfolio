@@ -1,7 +1,5 @@
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { neon } from "@neondatabase/serverless";
-import fs from "fs";
-import path from "path";
 import { compileLatexToPdf } from "../../../src/utils/latexCompiler";
 
 const s3 = new S3Client({
@@ -53,15 +51,7 @@ export default async function handler(req, res) {
     `;
 
     if (!rows || rows.length === 0) {
-      // Fallback to static file if exists
-      const fallbackFile = path.resolve(process.cwd(), "public/GARV_RAHUT_resume.pdf");
-      if (fs.existsSync(fallbackFile)) {
-        const staticBuf = fs.readFileSync(fallbackFile);
-        res.setHeader("Content-Type", "application/pdf");
-        res.setHeader("Content-Disposition", 'inline; filename="Garv_Rahut_Resume.pdf"');
-        return res.send(staticBuf);
-      }
-      return res.status(404).json({ error: "No published resume found." });
+      return res.status(404).json({ error: "No published resume found in database." });
     }
 
     const resume = rows[0];
@@ -71,7 +61,9 @@ export default async function handler(req, res) {
     if (pdfCache.key === cacheKey && pdfCache.buffer) {
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `inline; filename="${(resume.title || "resume").replace(/\.tex$/i, "")}.pdf"`);
-      res.setHeader("Cache-Control", "public, max-age=1800, stale-while-revalidate=86400");
+      res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+      res.setHeader("Pragma", "no-cache");
+      res.setHeader("Expires", "0");
       return res.send(pdfCache.buffer);
     }
 
@@ -94,18 +86,12 @@ export default async function handler(req, res) {
 
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `inline; filename="${(resume.title || "resume").replace(/\.tex$/i, "")}.pdf"`);
-    res.setHeader("Cache-Control", "public, max-age=1800, stale-while-revalidate=86400");
+    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
     return res.send(pdfBuffer);
   } catch (err) {
     console.error("Public PDF serving error:", err);
-    // If compilation fails, check if static backup exists
-    const fallbackFile = path.resolve(process.cwd(), "public/GARV_RAHUT_resume.pdf");
-    if (fs.existsSync(fallbackFile)) {
-      const staticBuf = fs.readFileSync(fallbackFile);
-      res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", 'inline; filename="Garv_Rahut_Resume.pdf"');
-      return res.send(staticBuf);
-    }
     return res.status(500).json({ error: "Failed to generate published resume PDF: " + err.message });
   }
 }

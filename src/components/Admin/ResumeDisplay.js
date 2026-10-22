@@ -5,9 +5,7 @@ import {
   AiOutlineEdit, 
   AiOutlineEye, 
   AiOutlineDelete, 
-  AiOutlineGlobal, 
-  AiOutlineFileText,
-  AiOutlineArrowRight
+  AiOutlineFileText
 } from "react-icons/ai";
 import axios from "axios";
 
@@ -103,35 +101,6 @@ function ResumeDisplay({ onOpenStudioWithResume, onSwitchToStudio }) {
             </a>{" "}
             page.
           </p>
-        </div>
-
-        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-          <Button
-            variant="outline-info"
-            size="sm"
-            href="/resume"
-            target="_blank"
-            style={{ fontWeight: "600", fontSize: "0.85rem", padding: "6px 14px" }}
-          >
-            <AiOutlineGlobal className="me-1" /> View Live /resume Page
-          </Button>
-
-          {onSwitchToStudio && (
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={onSwitchToStudio}
-              style={{
-                background: "linear-gradient(135deg, #8a2be2 0%, #4a00e0 100%)",
-                border: "none",
-                fontWeight: "600",
-                fontSize: "0.85rem",
-                padding: "6px 14px",
-              }}
-            >
-              Open AI Resume Studio <AiOutlineArrowRight className="ms-1" />
-            </Button>
-          )}
         </div>
       </div>
 
