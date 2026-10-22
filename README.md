@@ -28,12 +28,14 @@
 
 ---
 
-## ✨ Key Features
+## ✨ Key Features (Hidden Admin Panel)
+
+> 🔒 **Hidden Admin Panel (Secured with Auth Wall):** These features are located inside a hidden admin panel accessible at `/admin`, which is secured with an authentication wall backed by **Neon Auth (PostgreSQL sessions)**. It enables seamless drag-and-drop project curation, dynamic resume publishing, and AI-powered LaTeX generation while ensuring public visitor pages remain clean, fast, and protected.
 
 ### 1. 🗂️ Interactive Project Management
-- **Drag-and-Drop Priority Reordering:** Seamlessly drag repositories to reorder their showcase priority on the live portfolio.
-- **Accordion Control:** Fine-tune custom titles, override live demo links (or fallback automatically to GitHub repo homepages), and attach custom preview image URL
-- **Neon PostgreSQL Sync:** Syncs GitHub repos directly to Neon PostgreSQL, preserving visibility and custom metadata, via daily github actions workflow.
+- **Drag-and-Drop Priority Reordering:** Seamlessly drag repositories inside the admin dashboard to reorder their showcase priority on the live portfolio.
+- **Accordion Control:** Fine-tune custom titles, override live demo links (or fallback automatically to GitHub repo homepages), and attach custom preview image URLs.
+- **Neon PostgreSQL Sync:** Syncs GitHub repos directly to Neon PostgreSQL, preserving visibility and custom metadata via daily GitHub Actions workflow.
 
 <details>
 <summary><b>📸 View Feature Screenshot: Project Management</b></summary>
