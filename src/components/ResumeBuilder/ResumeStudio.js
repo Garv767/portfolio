@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button, Form, Badge, Spinner } from "react-bootstrap";
 import { 
   AiOutlineThunderbolt, 
@@ -26,6 +26,66 @@ function ResumeStudio({ onBackToDashboard }) {
   const [targetRole, setTargetRole] = useState("");
   const [currentResumeId, setCurrentResumeId] = useState(null);
 
+  // Resizable panel dimensions
+  const [filePanelWidth, setFilePanelWidth] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("resume_file_panel_width");
+      return saved ? parseInt(saved, 10) : 230;
+    }
+    return 230;
+  });
+
+  const [editorSplitPercent, setEditorSplitPercent] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("resume_editor_split_percent");
+      return saved ? parseFloat(saved, 10) : 50;
+    }
+    return 50;
+  });
+
+  const [isDraggingFile, setIsDraggingFile] = useState(false);
+  const [isDraggingEditor, setIsDraggingEditor] = useState(false);
+  const workspaceRef = useRef(null);
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!isDraggingFile && !isDraggingEditor) return;
+      if (!workspaceRef.current) return;
+
+      const rect = workspaceRef.current.getBoundingClientRect();
+
+      if (isDraggingFile) {
+        const newWidth = Math.max(160, Math.min(480, e.clientX - rect.left));
+        setFilePanelWidth(newWidth);
+        localStorage.setItem("resume_file_panel_width", newWidth);
+      } else if (isDraggingEditor) {
+        const availableWidth = rect.width - filePanelWidth - 10;
+        const editorWidthPx = e.clientX - rect.left - filePanelWidth - 5;
+        const newPercent = Math.max(20, Math.min(80, (editorWidthPx / availableWidth) * 100));
+        setEditorSplitPercent(newPercent);
+        localStorage.setItem("resume_editor_split_percent", newPercent);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDraggingFile(false);
+      setIsDraggingEditor(false);
+    };
+
+    if (isDraggingFile || isDraggingEditor) {
+      window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("mouseup", handleMouseUp);
+      document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = "none";
+    }
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+  }, [isDraggingFile, isDraggingEditor, filePanelWidth]);
   // Saved resumes from Neon DB
   const [savedResumes, setSavedResumes] = useState([]);
   const [loadingResumes, setLoadingResumes] = useState(false);
@@ -184,7 +244,7 @@ function ResumeStudio({ onBackToDashboard }) {
     setSavingS3(true);
     try {
       await axios.post(`${API_BASE}/storage/master-context`, { content: masterContext });
-      alert("✅ master_context.md successfully saved to Neon S3 bucket!");
+      alert("master_context.md successfully saved!");
     } catch (err) {
       alert("Failed to save to S3: " + (err.response?.data?.error || err.message));
     } finally {
@@ -280,7 +340,7 @@ function ResumeStudio({ onBackToDashboard }) {
 
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <span style={{ color: "#c084f5", fontWeight: "bold", fontSize: "1.05rem", whiteSpace: "nowrap" }}>
-              ⚡ AI Resume Studio
+              AI Resume Studio
             </span>
             <Form.Control
               type="text"
@@ -342,7 +402,7 @@ function ResumeStudio({ onBackToDashboard }) {
                 disabled={savingDb}
                 style={{
                   fontSize: "0.82rem",
-                  padding: "5px 12px",
+                  padding: "5px 14px",
                   borderColor: savedDbSuccess ? "#28a745" : "rgba(192,132,245,0.5)",
                   color: savedDbSuccess ? "#fff" : "#c084f5",
                 }}
@@ -353,11 +413,11 @@ function ResumeStudio({ onBackToDashboard }) {
                   </>
                 ) : savedDbSuccess ? (
                   <>
-                    <AiOutlineCheck className="me-1" /> Saved to Neon
+                    <AiOutlineCheck className="me-1" /> Saved
                   </>
                 ) : (
                   <>
-                    <AiOutlineSave className="me-1" /> Save to Neon
+                    <AiOutlineSave className="me-1" /> Save
                   </>
                 )}
               </Button>
@@ -372,58 +432,147 @@ function ResumeStudio({ onBackToDashboard }) {
               disabled={savingS3}
               style={{ fontSize: "0.82rem", padding: "5px 14px" }}
             >
-              {savingS3 ? "Saving to S3..." : "Save master_context.md to Neon S3"}
+              {savingS3 ? "Saving..." : "Save Master Context"}
             </Button>
           )}
         </div>
       </div>
 
-      {/* 3-COLUMN OVERLEAF WORKSPACE */}
-      <div style={{
-        flex: 1,
-        display: "grid",
-        gridTemplateColumns: "220px 1fr 1fr",
-        minHeight: 0,
-      }}>
+      {/* 3-COLUMN RESIZABLE WORKSPACE */}
+      <div 
+        ref={workspaceRef}
+        style={{
+          flex: 1,
+          minHeight: 0,
+          display: "flex",
+          flexDirection: "row",
+          overflow: "hidden",
+          position: "relative",
+          userSelect: isDraggingFile || isDraggingEditor ? "none" : "auto",
+        }}
+      >
+        {/* Transparent drag shield when dragging to prevent iframe from consuming mouse events */}
+        {(isDraggingFile || isDraggingEditor) && (
+          <div style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 9999,
+            cursor: "col-resize",
+          }} />
+        )}
+
         {/* COLUMN 1: FILE TREE */}
-        <FileTree
-          activeFile={activeFile}
-          onSelectFile={handleSelectFile}
-          savedResumes={savedResumes}
-          loadingResumes={loadingResumes}
-          onSelectResume={handleSelectResume}
-          onDeleteResume={handleDeleteResume}
-          onNewResume={handleNewResume}
-          masterContextLoaded={!!masterContext}
+        <div style={{
+          width: `${filePanelWidth}px`,
+          flexShrink: 0,
+          height: "100%",
+          minHeight: 0,
+          overflow: "hidden",
+        }}>
+          <FileTree
+            activeFile={activeFile}
+            onSelectFile={handleSelectFile}
+            savedResumes={savedResumes}
+            loadingResumes={loadingResumes}
+            onSelectResume={handleSelectResume}
+            onDeleteResume={handleDeleteResume}
+            onNewResume={handleNewResume}
+            masterContextLoaded={!!masterContext}
+          />
+        </div>
+
+        {/* RESIZER 1: Files <-> Editor */}
+        <div
+          onMouseDown={(e) => {
+            e.preventDefault();
+            setIsDraggingFile(true);
+          }}
+          style={{
+            width: "5px",
+            flexShrink: 0,
+            cursor: "col-resize",
+            background: isDraggingFile ? "#c084f5" : "rgba(192, 132, 245, 0.15)",
+            transition: "background 0.15s ease",
+            zIndex: 20,
+          }}
+          title="Drag to resize Files panel"
+          onMouseEnter={(e) => {
+            if (!isDraggingFile) e.currentTarget.style.background = "#c084f5";
+          }}
+          onMouseLeave={(e) => {
+            if (!isDraggingFile) e.currentTarget.style.background = "rgba(192, 132, 245, 0.15)";
+          }}
         />
 
         {/* COLUMN 2: MONACO CODE EDITOR */}
-        <LatexEditor
-          content={isMarkdown ? masterContext : latexCode}
-          onChange={(val) => {
-            if (isMarkdown) {
-              setMasterContext(val);
-            } else {
-              setLatexCode(val);
-            }
+        <div style={{
+          flex: `0 0 calc(${editorSplitPercent}% - 5px)`,
+          minWidth: "240px",
+          height: "100%",
+          minHeight: 0,
+          overflow: "hidden",
+        }}>
+          <LatexEditor
+            content={isMarkdown ? masterContext : latexCode}
+            onChange={(val) => {
+              if (isMarkdown) {
+                setMasterContext(val);
+              } else {
+                setLatexCode(val);
+              }
+            }}
+            activeFileName={isMarkdown ? "master_context.md" : resumeTitle}
+            isMarkdown={isMarkdown}
+            onSaveS3={handleSaveMasterContextToS3}
+            savingS3={savingS3}
+            onOpenAiStudio={() => setShowAiModal(true)}
+          />
+        </div>
+
+        {/* RESIZER 2: Editor <-> Preview */}
+        <div
+          onMouseDown={(e) => {
+            e.preventDefault();
+            setIsDraggingEditor(true);
           }}
-          activeFileName={isMarkdown ? "master_context.md" : resumeTitle}
-          isMarkdown={isMarkdown}
-          onSaveS3={handleSaveMasterContextToS3}
-          savingS3={savingS3}
-          onOpenAiStudio={() => setShowAiModal(true)}
+          style={{
+            width: "5px",
+            flexShrink: 0,
+            cursor: "col-resize",
+            background: isDraggingEditor ? "#c084f5" : "rgba(192, 132, 245, 0.15)",
+            transition: "background 0.15s ease",
+            zIndex: 20,
+          }}
+          title="Drag to resize Code / Preview panels"
+          onMouseEnter={(e) => {
+            if (!isDraggingEditor) e.currentTarget.style.background = "#c084f5";
+          }}
+          onMouseLeave={(e) => {
+            if (!isDraggingEditor) e.currentTarget.style.background = "rgba(192, 132, 245, 0.15)";
+          }}
         />
 
         {/* COLUMN 3: LIVE PDF PREVIEW */}
-        <PdfPreview
-          pdfBlobUrl={pdfBlobUrl}
-          compiling={compiling}
-          compileError={compileError}
-          compileDuration={compileDuration}
-          onRecompile={() => compileLatex(latexCode)}
-          onDownloadPdf={handleDownloadPdf}
-          onDownloadTex={handleDownloadTex}
-        />
+        <div style={{
+          flex: 1,
+          minWidth: "260px",
+          height: "100%",
+          minHeight: 0,
+          overflow: "hidden",
+        }}>
+          <PdfPreview
+            pdfBlobUrl={pdfBlobUrl}
+            compiling={compiling}
+            compileError={compileError}
+            compileDuration={compileDuration}
+            onRecompile={() => compileLatex(latexCode)}
+            onDownloadPdf={handleDownloadPdf}
+            onDownloadTex={handleDownloadTex}
+          />
+        </div>
       </div>
 
       {/* AI OPTIMIZER MODAL */}

@@ -297,7 +297,7 @@ function AdminDashboard() {
                 fontSize: "0.82rem",
               }}
             >
-              <AiOutlineThunderbolt /> AI Resume Studio (Overleaf LaTeX)
+              <AiOutlineThunderbolt /> AI Resume Studio
             </Button>
             <Button
               size="sm"

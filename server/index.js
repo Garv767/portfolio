@@ -386,5 +386,5 @@ ${currentLatex}
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Portfolio & AI Resume Builder API Server running on http://localhost:${PORT}`);
+  console.log(`Portfolio & AI Resume Builder API Server running on http://localhost:${PORT}`);
 });

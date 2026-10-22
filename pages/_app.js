@@ -13,8 +13,12 @@ import Navbar from "../src/components/Navbar";
 import Footer from "../src/components/Footer";
 import ScrollToTop from "../src/components/ScrollToTop";
 
+import { useRouter } from "next/router";
+
 export default function MyApp({ Component, pageProps }) {
   const [load, updateLoad] = useState(true);
+  const router = useRouter();
+  const isAdmin = router.pathname.startsWith("/admin");
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -39,7 +43,7 @@ export default function MyApp({ Component, pageProps }) {
         <Navbar />
         <ScrollToTop />
         <Component {...pageProps} />
-        <Footer />
+        {!isAdmin && <Footer />}
       </div>
     </>
   );

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Modal, Button, Form, Row, Col, Spinner, Alert, Badge } from "react-bootstrap";
-import { AiOutlineCloudUpload, AiOutlineThunderbolt, AiOutlineKey } from "react-icons/ai";
+import { AiOutlineCloudUpload, AiOutlineThunderbolt, AiOutlineKey, AiOutlineCheck } from "react-icons/ai";
 import axios from "axios";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "/api";
@@ -198,8 +198,8 @@ function AiStudioModal({ show, onHide, onGenerated, currentLatexTemplate, templa
           </div>
 
           {uploadSuccess && (
-            <div style={{ color: "#28a745", fontSize: "0.8rem", marginBottom: "6px" }}>
-              ✓ {uploadSuccess}
+            <div style={{ color: "#28a745", fontSize: "0.8rem", marginBottom: "6px", display: "flex", alignItems: "center", gap: "4px" }}>
+              <AiOutlineCheck /> {uploadSuccess}
             </div>
           )}
 
@@ -248,25 +248,25 @@ function AiStudioModal({ show, onHide, onGenerated, currentLatexTemplate, templa
                 }}
                 style={{ background: "#21123a", border: "1px solid rgba(192,132,245,0.3)", color: "#fff" }}
               >
-                <optgroup label="⚡ Recommended Active Models (Google AI Studio)">
-                  <option value="gemini-3.8-flash">⚡ Gemini 3.8 Flash (High-Efficiency Workhorse)</option>
-                  <option value="gemini-3.5-flash-lite">🏎️ Gemini 3.5 Flash-Lite (Low Latency, High Availability)</option>
-                  <option value="gemini-4-argon">🔥 Gemini 4 Argon (Flagship Reasoning & Code)</option>
-                  <option value="gemini-3.6-flash">🚀 Gemini 3.6 Flash (Fast Text & Code)</option>
-                  <option value="gemini-3.8-live-extended-thinking">🧠 Gemini 3.8 Live Extended Thinking</option>
-                  <option value="gemini-3.1-pro-preview">💎 Gemini 3.1 Pro Preview (Deep Context)</option>
-                  <option value="gemini-3.1-flash-lite">💡 Gemini 3.1 Flash-Lite</option>
-                  <option value="gemini-3-flash-preview">🌟 Gemini 3 Flash Preview</option>
-                  <option value="gemini-omni-1.1-flash">🔮 Gemini Omni Flash (1.1 Flash)</option>
-                  <option value="gemini-2.5-pro">🏆 Gemini 2.5 Pro (Deep Reasoning)</option>
+                <optgroup label="Recommended Active Models (Google AI Studio)">
+                  <option value="gemini-3.8-flash">Gemini 3.8 Flash (High-Efficiency Workhorse)</option>
+                  <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite (Low Latency, High Availability)</option>
+                  <option value="gemini-4-argon">Gemini 4 Argon (Flagship Reasoning & Code)</option>
+                  <option value="gemini-3.6-flash">Gemini 3.6 Flash (Fast Text & Code)</option>
+                  <option value="gemini-3.8-live-extended-thinking">Gemini 3.8 Live Extended Thinking</option>
+                  <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro Preview (Deep Context)</option>
+                  <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite</option>
+                  <option value="gemini-3-flash-preview">Gemini 3 Flash Preview</option>
+                  <option value="gemini-omni-1.1-flash">Gemini Omni Flash (1.1 Flash)</option>
+                  <option value="gemini-2.5-pro">Gemini 2.5 Pro (Deep Reasoning)</option>
                 </optgroup>
-                <optgroup label="⚠️ Legacy (May 404 for new users)">
+                <optgroup label="Legacy (May 404 for new users)">
                   <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
                   <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
                 </optgroup>
               </Form.Select>
               <div style={{ fontSize: "0.72rem", color: "#a5b1c2", marginTop: "4px" }}>
-                🛡️ Includes automatic 503 high-demand fallback across 3.8/3.5/3.6/4 endpoints.
+                Automatic 503 high-demand fallback enabled across 3.8/3.5/3.6/4 endpoints.
               </div>
             </Form.Group>
           </Col>
@@ -287,7 +287,7 @@ function AiStudioModal({ show, onHide, onGenerated, currentLatexTemplate, templa
         </Row>
 
         <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.5)", marginTop: "6px" }}>
-          ℹ️ The AI automatically loads <strong>master_context.md</strong> from your Neon S3 bucket and <strong>33 synced projects</strong> from Neon PostgreSQL.
+          The AI automatically loads <strong>master_context.md</strong> from your Neon S3 bucket and <strong>33 synced projects</strong> from Neon PostgreSQL.
         </div>
       </Modal.Body>
 

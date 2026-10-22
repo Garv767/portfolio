@@ -1,12 +1,11 @@
 import React from "react";
-import { Button, Badge, Spinner } from "react-bootstrap";
+import { Button, Spinner } from "react-bootstrap";
 import { 
   AiOutlineFile, 
   AiOutlineFolder, 
   AiOutlinePlus, 
   AiOutlineDelete, 
-  AiOutlineCloud, 
-  AiOutlineCheckCircle
+  AiOutlineBook
 } from "react-icons/ai";
 import { TEMPLATES } from "./templates";
 
@@ -37,8 +36,8 @@ function FileTree({
         justifyContent: "space-between",
         alignItems: "center"
       }}>
-        <span style={{ fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "1px", color: "rgba(255,255,255,0.6)", fontWeight: "bold" }}>
-          Project Files
+        <span style={{ fontSize: "0.85rem", letterSpacing: "0.5px", color: "rgba(255,255,255,0.8)", fontWeight: "600" }}>
+          Files
         </span>
         <Button
           size="sm"
@@ -52,10 +51,10 @@ function FileTree({
 
       <div style={{ flex: 1, overflowY: "auto", padding: "10px" }}>
         
-        {/* 1. S3 MASTER CONTEXT */}
+        {/* 1. MASTER CONTEXT */}
         <div style={{ marginBottom: "16px" }}>
-          <div style={{ fontSize: "0.75rem", color: "#c084f5", fontWeight: "600", marginBottom: "6px", display: "flex", alignItems: "center", gap: "6px" }}>
-            <AiOutlineCloud /> NEON S3 STORAGE
+          <div style={{ fontSize: "0.75rem", color: "#c084f5", fontWeight: "600", marginBottom: "6px", display: "flex", alignItems: "center", gap: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+            <AiOutlineBook /> Master context
           </div>
           <div
             onClick={() => onSelectFile("master_context.md")}
@@ -79,16 +78,13 @@ function FileTree({
                 master_context.md
               </span>
             </div>
-            <Badge bg="secondary" style={{ fontSize: "0.6rem", background: "rgba(255,255,255,0.1)" }}>
-              S3
-            </Badge>
           </div>
         </div>
 
         {/* 2. PRESET TEMPLATES */}
         <div style={{ marginBottom: "16px" }}>
-          <div style={{ fontSize: "0.75rem", color: "#c084f5", fontWeight: "600", marginBottom: "6px", display: "flex", alignItems: "center", gap: "6px" }}>
-            <AiOutlineFolder /> PRESET TEMPLATES
+          <div style={{ fontSize: "0.75rem", color: "#c084f5", fontWeight: "600", marginBottom: "6px", display: "flex", alignItems: "center", gap: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+            <AiOutlineFolder /> Preset Templates
           </div>
           {TEMPLATES.map((tmpl) => {
             const isSelected = activeFile === `template:${tmpl.key}`;
@@ -120,16 +116,16 @@ function FileTree({
           })}
         </div>
 
-        {/* 3. SAVED RESUMES (FROM NEON DB) */}
+        {/* 3. SAVED RESUMES */}
         <div>
-          <div style={{ fontSize: "0.75rem", color: "#c084f5", fontWeight: "600", marginBottom: "6px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <span>SAVED RESUMES ({savedResumes.length})</span>
+          <div style={{ fontSize: "0.75rem", color: "#c084f5", fontWeight: "600", marginBottom: "6px", display: "flex", alignItems: "center", justifyContent: "space-between", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+            <span>Saved Resumes ({savedResumes.length})</span>
             {loadingResumes && <Spinner animation="border" size="sm" style={{ width: "12px", height: "12px" }} />}
           </div>
 
           {savedResumes.length === 0 && !loadingResumes && (
             <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.4)", fontStyle: "italic", padding: "6px 8px" }}>
-              No saved resumes yet. Click "Save to Neon" to persist versions.
+              No saved resumes yet. Click "Save" to persist versions.
             </div>
           )}
 
@@ -192,20 +188,6 @@ function FileTree({
           })}
         </div>
 
-      </div>
-
-      {/* Footer Info */}
-      <div style={{
-        padding: "8px 12px",
-        borderTop: "1px solid rgba(192, 132, 245, 0.15)",
-        fontSize: "0.7rem",
-        color: "rgba(255,255,255,0.4)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between"
-      }}>
-        <span>Neon Postgres & S3</span>
-        <AiOutlineCheckCircle style={{ color: "#2ed573" }} />
       </div>
     </div>
   );

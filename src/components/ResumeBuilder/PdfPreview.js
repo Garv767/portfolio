@@ -174,8 +174,8 @@ function PdfPreview({
           maxHeight: "150px",
           overflowY: "auto",
         }}>
-          <div style={{ fontWeight: "bold", marginBottom: "4px", display: "flex", justifyContent: "space-between" }}>
-            <span>⚠️ LaTeX Compilation Error:</span>
+          <div style={{ fontWeight: "bold", marginBottom: "4px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ display: "flex", alignItems: "center", gap: "6px" }}><AiOutlineWarning /> LaTeX Compilation Error:</span>
             <span style={{ cursor: "pointer", textDecoration: "underline" }} onClick={() => setShowErrorLog(false)}>Hide</span>
           </div>
           <pre style={{ margin: 0, whiteSpace: "pre-wrap", color: "#ffa5b2" }}>

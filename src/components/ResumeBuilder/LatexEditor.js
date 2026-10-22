@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Editor from "@monaco-editor/react";
 import { Button, Form, Spinner, Badge } from "react-bootstrap";
-import { AiOutlineSend, AiOutlineThunderbolt } from "react-icons/ai";
+import { AiOutlineSend, AiOutlineThunderbolt, AiOutlineWarning } from "react-icons/ai";
 import axios from "axios";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "/api";
@@ -133,8 +133,8 @@ function LatexEditor({
           zIndex: 10,
         }}>
           {refineError && (
-            <div style={{ color: "#ff6b6b", fontSize: "0.75rem", marginBottom: "4px" }}>
-              ⚠️ {refineError}
+            <div style={{ color: "#ff6b6b", fontSize: "0.75rem", marginBottom: "4px", display: "flex", alignItems: "center", gap: "4px" }}>
+              <AiOutlineWarning /> {refineError}
             </div>
           )}
           <Form onSubmit={handleRefine} style={{ display: "flex", gap: "8px", alignItems: "center" }}>
