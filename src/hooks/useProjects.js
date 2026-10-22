@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { formatImageUrl } from "../utils/imageUrl";
 
 const GITHUB_USERNAME = "garv767";
 
@@ -65,7 +66,7 @@ const useProjects = () => {
               ghLink: repo.html_url,
               demoLink,
               imgPath:
-                config?.custom_image_url ||
+                formatImageUrl(config?.custom_image_url) ||
                 `https://opengraph.githubassets.com/1/${GITHUB_USERNAME}/${repo.name}`,
               stars: repo.stargazers_count,
               forks: repo.forks_count,

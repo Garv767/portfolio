@@ -5,11 +5,13 @@ import { CgWebsite } from "react-icons/cg";
 import { BsGithub } from "react-icons/bs";
 import { AiOutlineStar } from "react-icons/ai";
 import { BiGitRepoForked } from "react-icons/bi";
+import { formatImageUrl } from "../../utils/imageUrl";
 
 function ProjectCards(props) {
+  const imgSrc = formatImageUrl(props.imgPath?.src || props.imgPath);
   return (
     <Card className="project-card-view">
-      <Card.Img variant="top" src={props.imgPath?.src || props.imgPath} alt="card-img" loading="lazy" />
+      <Card.Img variant="top" src={imgSrc} alt="card-img" loading="lazy" />
       <Card.Body>
         <Card.Title>{props.title}</Card.Title>
         <Card.Text style={{ textAlign: "justify" }}>

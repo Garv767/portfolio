@@ -8,6 +8,7 @@ import { AiOutlineEye, AiOutlineEyeInvisible, AiOutlineSave, AiOutlineLogout, Ai
 import { useRouter } from "next/router";
 import ResumeStudio from "../ResumeBuilder/ResumeStudio";
 import ResumeDisplay from "./ResumeDisplay";
+import { formatImageUrl } from "../../utils/imageUrl";
 
 const GITHUB_USERNAME = "garv767";
 
@@ -616,12 +617,23 @@ function AdminDashboard() {
                                     <Form.Control
                                       size="sm"
                                       value={repo.custom_image_url}
-                                      placeholder="https://... (leave blank to use GitHub social preview)"
+                                      placeholder="https://... or /image.png (leave blank to use GitHub social preview)"
                                       style={inputStyle(false)}
                                       onChange={(e) =>
-                                        handleFieldChange(repo.repo_name, "custom_image_url", e.target.value)
+                                        handleFieldChange(repo.repo_name, "custom_image_url", formatImageUrl(e.target.value))
                                       }
                                     />
+                                    {repo.custom_image_url && (
+                                      <div style={{ marginTop: "8px", display: "flex", alignItems: "center", gap: "10px" }}>
+                                        <img
+                                          src={formatImageUrl(repo.custom_image_url)}
+                                          alt="Preview"
+                                          style={{ maxHeight: "48px", maxWidth: "90px", borderRadius: "4px", border: "1px solid rgba(192,132,245,0.4)", objectFit: "cover" }}
+                                          onError={(e) => { e.target.style.display = 'none'; }}
+                                        />
+                                        <span style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.5)" }}>Image preview</span>
+                                      </div>
+                                    )}
                                   </Form.Group>
                                 </div>
                               </div>

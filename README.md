@@ -111,23 +111,24 @@ npm install
 ```
 
 ### 3. Configure environment variables
-Create a `.env.local` file with the following keys:
+Create a `.env.local` file (or copy from `.env.example`) with the following keys:
 ```env
-# Neon Database & S3
+# Neon PostgreSQL Database
 DATABASE_URL=postgresql://user:pass@ep-xyz.neon.tech/neondb?sslmode=require
 NEON_DATABASE_URL=postgresql://user:pass@ep-xyz.neon.tech/neondb?sslmode=require
-AWS_ENDPOINT_URL_S3=https://s3.us-east-2.amazonaws.com
+
+# Neon S3-Compatible Storage
+AWS_ENDPOINT_URL_S3=https://br-xyz.storage.c-6.us-east-2.aws.neon.tech
 AWS_REGION=us-east-2
 AWS_ACCESS_KEY_ID=your_access_key
 AWS_SECRET_ACCESS_KEY=your_secret_key
-NEON_S3_BUCKET_NAME=your_bucket_name
+NEON_S3_BUCKET_NAME=resume-storage
 
-# AI Studio
+# Google Gemini AI Studio
 GEMINI_API_KEY=your_gemini_api_key
 
-# Admin Authentication
-ADMIN_SECRET_KEY=your_admin_secret_key
-NEXT_PUBLIC_ADMIN_USER=admin
+# GitHub Token (Optional for local dev, used for repository sync)
+GITHUB_TOKEN=your_github_personal_access_token
 ```
 
 ### 4. Run the development server
