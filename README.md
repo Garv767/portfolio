@@ -9,18 +9,18 @@
 </p>
 
 <p align="center">
-  <a href="https://garv.is-a.dev" target="_blank">
-    <strong>🌐 Live Domain: garv.is-a.dev</strong>
+  <a href="https://garv767.is-a.dev" target="_blank">
+    <strong>🌐 Primary Domain: garv767.is-a.dev</strong>
   </a>
   &nbsp;|&nbsp;
-  <a href="https://garv767.is-a.dev" target="_blank">
-    <strong>garv767.is-a.dev</strong>
+  <a href="https://garv.is-a.dev" target="_blank">
+    <strong>Mirror: garv.is-a.dev</strong>
   </a>
 </p>
 
 <div align="center">
 
-[![Live Site](https://img.shields.io/badge/Live_Site-garv.is--a.dev-623686?style=for-the-badge&logo=google-chrome&logoColor=white)](https://garv.is-a.dev)
+[![Live Site](https://img.shields.io/badge/Live_Site-garv767.is--a.dev-623686?style=for-the-badge&logo=google-chrome&logoColor=white)](https://garv767.is-a.dev)
 [![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![Neon Database](https://img.shields.io/badge/Neon-PostgreSQL_%26_S3-00E599?style=for-the-badge&logo=postgresql&logoColor=black)](https://neon.tech/)
 
@@ -32,16 +32,16 @@
 
 ### 1. 🗂️ Interactive Project Management
 - **Drag-and-Drop Priority Reordering:** Seamlessly drag repositories to reorder their showcase priority on the live portfolio.
-- **Accordion Control:** Fine-tune custom titles, override live demo links (or fallback automatically to GitHub repo homepages), and attach custom social previews.
-- **Neon PostgreSQL Sync:** Syncs GitHub repos directly to Neon PostgreSQL, preserving visibility and custom metadata.
+- **Accordion Control:** Fine-tune custom titles, override live demo links (or fallback automatically to GitHub repo homepages), and attach custom preview image URL
+- **Neon PostgreSQL Sync:** Syncs GitHub repos directly to Neon PostgreSQL, preserving visibility and custom metadata, via daily github actions workflow.
 
 <details>
-<summary><b>📸 View Feature Screenshot: Project Management & Accordion Controls</b></summary>
+<summary><b>📸 View Feature Screenshot: Project Management</b></summary>
 
 <br>
 
 <div align="center">
-  <img src="public/admin-accordion.png" alt="Admin Dashboard Accordion and Drag-and-Drop Management" width="850" />
+  <img src="public/project-management-feature.png" alt="Project Management" width="850" />
 </div>
 
 </details>
@@ -140,5 +140,5 @@ Open [http://localhost:3000](http://localhost:3000) to view the portfolio.
 ## 🌐 Live Deployment
 
 The portfolio is deployed live at:
-- **Primary Domain:** [https://garv.is-a.dev](https://garv.is-a.dev)
-- **Mirror Domain:** [https://garv767.is-a.dev](https://garv767.is-a.dev)
+- **Primary Domain:** [https://garv767.is-a.dev](https://garv767.is-a.dev)
+- **Mirror Domain:** [https://garv.is-a.dev](https://garv.is-a.dev)

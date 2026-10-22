@@ -52,46 +52,42 @@ function NavBar() {
         <Navbar.Collapse id="responsive-navbar-nav">
           <Nav className="ms-auto" defaultActiveKey="#home">
             <Nav.Item>
-              <Nav.Link as={Link} href="/" onClick={() => updateExpanded(false)}>
-                <AiOutlineHome style={{ marginBottom: "2px" }} /> Home
-              </Nav.Link>
+              <Link href="/" passHref legacyBehavior>
+                <Nav.Link onClick={() => updateExpanded(false)}>
+                  <AiOutlineHome style={{ marginBottom: "2px" }} /> Home
+                </Nav.Link>
+              </Link>
             </Nav.Item>
 
             <Nav.Item>
-              <Nav.Link
-                as={Link}
-                href="/about"
-                onClick={() => updateExpanded(false)}
-              >
-                <AiOutlineUser style={{ marginBottom: "2px" }} /> About
-              </Nav.Link>
+              <Link href="/about" passHref legacyBehavior>
+                <Nav.Link onClick={() => updateExpanded(false)}>
+                  <AiOutlineUser style={{ marginBottom: "2px" }} /> About
+                </Nav.Link>
+              </Link>
             </Nav.Item>
 
             <Nav.Item>
-              <Nav.Link
-                as={Link}
-                href="/project"
-                onClick={() => updateExpanded(false)}
-              >
-                <AiOutlineFundProjectionScreen
-                  style={{ marginBottom: "2px" }}
-                />{" "}
-                Projects
-              </Nav.Link>
+              <Link href="/project" passHref legacyBehavior>
+                <Nav.Link onClick={() => updateExpanded(false)}>
+                  <AiOutlineFundProjectionScreen
+                    style={{ marginBottom: "2px" }}
+                  />{" "}
+                  Projects
+                </Nav.Link>
+              </Link>
             </Nav.Item>
 
             <Nav.Item>
-              <Nav.Link
-                as={Link}
-                href="/resume"
-                onClick={() => updateExpanded(false)}
-              >
-                <CgFileDocument style={{ marginBottom: "2px" }} /> Resume
-              </Nav.Link>
+              <Link href="/resume" passHref legacyBehavior>
+                <Nav.Link onClick={() => updateExpanded(false)}>
+                  <CgFileDocument style={{ marginBottom: "2px" }} /> Resume
+                </Nav.Link>
+              </Link>
             </Nav.Item>
             <Nav.Item className="fork-btn">
               <Button
-                href="https://github.com/garv767"
+                href="https://github.com/garv767/portfolio"
                 target="_blank"
                 className="fork-btn-inner"
               >

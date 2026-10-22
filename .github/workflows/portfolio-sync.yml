@@ -8,22 +8,21 @@ on:
 jobs:
   sync:
     runs-on: ubuntu-latest
-    environment: github-pages
     steps:
       - name: Checkout 🛎️
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js ⚙️
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: "20"
 
       - name: Install dependencies 🔧
-        run: npm install axios @supabase/supabase-js
+        run: npm install axios @neondatabase/serverless dotenv
 
       - name: Run Sync Script 🔄
-        run: node --dns-result-order=ipv4first scripts/syncRepos.js
+        run: node scripts/syncReposNeon.js
         env:
-          SUPABASE_URL: ${{ vars.REACT_APP_SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ vars.SUPABASE_SERVICE_ROLE_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL || vars.DATABASE_URL || vars.NEON_DATABASE_URL }}
+          NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL || vars.NEON_DATABASE_URL || secrets.DATABASE_URL }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN || github.token }}
