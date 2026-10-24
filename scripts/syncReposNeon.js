@@ -5,8 +5,9 @@ require("dotenv").config({ path: path.resolve(__dirname, "../.env.local") });
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 
 const GITHUB_USERNAME = "garv767";
-const DATABASE_URL = process.env.DATABASE_URL || process.env.NEON_DATABASE_URL;
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+const rawDbUrl = process.env.DATABASE_URL || process.env.NEON_DATABASE_URL;
+const DATABASE_URL = rawDbUrl ? rawDbUrl.trim().replace(/^["']|["']$/g, '') : null;
+const GITHUB_TOKEN = (process.env.GITHUB_TOKEN || process.env.GH_TOKEN || "").trim();
 
 if (!DATABASE_URL) {
   console.error("Missing DATABASE_URL. Ensure environment variables include the Neon connection string.");

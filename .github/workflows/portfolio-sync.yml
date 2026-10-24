@@ -8,6 +8,7 @@ on:
 jobs:
   sync:
     runs-on: ubuntu-latest
+    environment: github-pages
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v4
@@ -23,6 +24,6 @@ jobs:
       - name: Run Sync Script 🔄
         run: node scripts/syncReposNeon.js
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL || secrets.NEON_DATABASE_URL || vars.DATABASE_URL || vars.NEON_DATABASE_URL }}
-          NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL || secrets.DATABASE_URL || vars.NEON_DATABASE_URL || vars.DATABASE_URL }}
+          DATABASE_URL: ${{ vars.NEON_DATABASE_URL || vars.DATABASE_URL || secrets.DATABASE_URL || secrets.NEON_DATABASE_URL }}
+          NEON_DATABASE_URL: ${{ vars.NEON_DATABASE_URL || vars.DATABASE_URL || secrets.NEON_DATABASE_URL || secrets.DATABASE_URL }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN || github.token }}
