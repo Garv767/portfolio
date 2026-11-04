@@ -34,6 +34,8 @@ function AdminDashboard() {
   const [dirtyState, setDirtyState] = useState({});
   // Per-repo save status: 'idle' | 'saving' | 'saved'
   const [saveStatus, setSaveStatus] = useState({});
+  const [orderSaving, setOrderSaving] = useState(false);
+  const [orderSaved, setOrderSaved] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -187,6 +189,26 @@ function AdminDashboard() {
       await axios.post("/api/projects", updates);
     } catch (err) {
       console.error("Error updating priorities:", err);
+    }
+  };
+
+  const handleSaveAllPriorities = async () => {
+    setOrderSaving(true);
+    setOrderSaved(false);
+    try {
+      const updates = repos.map((item, index) => ({
+        repo_name: item.repo_name,
+        display_title: item.display_title || item.repo_name,
+        priority: index,
+      }));
+      await axios.post("/api/projects", updates);
+      setOrderSaved(true);
+      setTimeout(() => setOrderSaved(false), 3000);
+    } catch (err) {
+      console.error("Error saving project order:", err);
+      alert("Failed to save order: " + (err.response?.data?.error || err.message));
+    } finally {
+      setOrderSaving(false);
     }
   };
 
@@ -401,6 +423,30 @@ function AdminDashboard() {
           <h1 className="project-heading" style={{ margin: 0 }}>
             Project <strong className="purple">Management </strong>
           </h1>
+          <div className="d-flex align-items-center gap-2">
+            <Button
+              variant={orderSaved ? "success" : "primary"}
+              onClick={handleSaveAllPriorities}
+              disabled={orderSaving}
+              style={{
+                background: orderSaved ? "#198754" : "#623686",
+                borderColor: orderSaved ? "#198754" : "#623686",
+                fontWeight: "600",
+                fontSize: "0.85rem",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+              }}
+            >
+              {orderSaving ? (
+                "Saving Order..."
+              ) : orderSaved ? (
+                <><AiOutlineCheck /> Order Saved!</>
+              ) : (
+                <><AiOutlineSave /> Save Order ({repos.length})</>
+              )}
+            </Button>
+          </div>
         </div>
         <p style={{ color: "rgba(255,255,255,0.5)", marginBottom: "20px" }}>
           {repos.length} repositories found. Drag to reorder. Yellow border = unsaved changes.
