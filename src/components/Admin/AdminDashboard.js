@@ -1,10 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { Container, Button, Form, Collapse, Badge } from "react-bootstrap";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import axios from "axios";
 import Particle from "../Particle";
 import { CgWebsite } from "react-icons/cg";
-import { AiOutlineEye, AiOutlineEyeInvisible, AiOutlineSave, AiOutlineLogout, AiOutlineCheck, AiOutlineDown, AiOutlineRight, AiOutlineThunderbolt, AiOutlineAppstore, AiOutlineGlobal } from "react-icons/ai";
+import { 
+  AiOutlineEye, 
+  AiOutlineEyeInvisible, 
+  AiOutlineSave, 
+  AiOutlineLogout, 
+  AiOutlineCheck, 
+  AiOutlineDown, 
+  AiOutlineRight, 
+  AiOutlineThunderbolt, 
+  AiOutlineAppstore, 
+  AiOutlineGlobal
+} from "react-icons/ai";
 import { useRouter } from "next/router";
 import ResumeStudio from "../ResumeBuilder/ResumeStudio";
 import ResumeDisplay from "./ResumeDisplay";
@@ -36,6 +46,9 @@ function AdminDashboard() {
   const [saveStatus, setSaveStatus] = useState({});
   const [orderSaving, setOrderSaving] = useState(false);
   const [orderSaved, setOrderSaved] = useState(false);
+  const [orderDirty, setOrderDirty] = useState(false);
+  const [draggedIndex, setDraggedIndex] = useState(null);
+  const [dragOverIndex, setDragOverIndex] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -50,14 +63,21 @@ function AdminDashboard() {
       );
       const ghRepos = ghRes.data;
 
-      const dbRes = await axios.get("/api/projects").catch(() => ({ data: [] }));
+      const dbRes = await axios
+        .get(`/api/projects?t=${Date.now()}`, {
+          headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
+        })
+        .catch(() => ({ data: [] }));
       const dbData = Array.isArray(dbRes.data) ? dbRes.data : [];
 
       const configMap = new Map();
-      dbData.forEach((d) => configMap.set(d.repo_name, d));
+      dbData.forEach((d) => {
+        configMap.set(d.repo_name, d);
+        if (d.repo_name) configMap.set(d.repo_name.toLowerCase(), d);
+      });
 
       const merged = ghRepos.map((repo) => {
-        const config = configMap.get(repo.name);
+        const config = configMap.get(repo.name) || configMap.get(repo.name.toLowerCase());
         // Store GitHub's homepage separately so we can always fall back to it
         const gh_homepage = repo.homepage || "";
         const demo_url = config?.demo_url || gh_homepage;
@@ -70,7 +90,7 @@ function AdminDashboard() {
           demo_url_override: config?.demo_url || "", // tracks explicit admin override
           gh_homepage,
           is_visible: config?.is_visible ?? false,
-          priority: config?.priority ?? 999,
+          priority: config?.priority !== undefined && config?.priority !== null ? Number(config.priority) : 999,
           is_fork: repo.fork,
           language: repo.language,
         };
@@ -85,6 +105,7 @@ function AdminDashboard() {
       setRepos(sorted);
       setDirtyState({});
       setSaveStatus({});
+      setOrderDirty(false);
     } catch (err) {
       console.error(err);
     } finally {
@@ -172,24 +193,49 @@ function AdminDashboard() {
     setSaveStatus((prev) => ({ ...prev, [repoName]: "idle" }));
   };
 
-  const onDragEnd = async (result) => {
-    if (!result.destination) return;
-    const items = Array.from(repos);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-    const updatedItems = items.map((item, index) => ({ ...item, priority: index }));
-    setRepos(updatedItems);
-
-    const updates = updatedItems.map((item) => ({
-      repo_name: item.repo_name,
-      display_title: item.display_title || item.repo_name,
-      priority: item.priority,
-    }));
-    try {
-      await axios.post("/api/projects", updates);
-    } catch (err) {
-      console.error("Error updating priorities:", err);
+  const handleDragStart = (e, index) => {
+    const tag = e.target?.tagName?.toLowerCase();
+    if (tag === "input" || tag === "textarea" || tag === "button" || tag === "select") {
+      e.preventDefault();
+      return;
     }
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+    try {
+      e.dataTransfer.setData("text/plain", `${index}`);
+    } catch (_) {}
+  };
+
+  const handleDragOver = (e, index) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    if (dragOverIndex !== index) {
+      setDragOverIndex(index);
+    }
+  };
+
+  const handleDrop = (e, targetIndex) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === targetIndex) {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+
+    const newRepos = [...repos];
+    const [moved] = newRepos.splice(draggedIndex, 1);
+    newRepos.splice(targetIndex, 0, moved);
+
+    const updated = newRepos.map((r, idx) => ({ ...r, priority: idx }));
+    setRepos(updated);
+    setOrderDirty(true);
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+    setDragOverIndex(null);
   };
 
   const handleSaveAllPriorities = async () => {
@@ -200,10 +246,15 @@ function AdminDashboard() {
         repo_name: item.repo_name,
         display_title: item.display_title || item.repo_name,
         priority: index,
+        is_visible: item.is_visible,
       }));
-      await axios.post("/api/projects", updates);
-      setOrderSaved(true);
-      setTimeout(() => setOrderSaved(false), 3000);
+      const res = await axios.post("/api/projects", updates);
+      if (res.data?.success) {
+        setOrderSaved(true);
+        setOrderDirty(false);
+        setRepos((prev) => prev.map((r, idx) => ({ ...r, priority: idx })));
+        setTimeout(() => setOrderSaved(false), 3000);
+      }
     } catch (err) {
       console.error("Error saving project order:", err);
       alert("Failed to save order: " + (err.response?.data?.error || err.message));
@@ -425,23 +476,34 @@ function AdminDashboard() {
           </h1>
           <div className="d-flex align-items-center gap-2">
             <Button
-              variant={orderSaved ? "success" : "primary"}
+              variant={orderSaved ? "success" : orderDirty ? "warning" : "primary"}
               onClick={handleSaveAllPriorities}
               disabled={orderSaving}
               style={{
-                background: orderSaved ? "#198754" : "#623686",
-                borderColor: orderSaved ? "#198754" : "#623686",
+                background: orderSaved
+                  ? "#198754"
+                  : orderDirty
+                  ? "#b78103"
+                  : "#623686",
+                borderColor: orderSaved
+                  ? "#198754"
+                  : orderDirty
+                  ? "#d39e00"
+                  : "#623686",
                 fontWeight: "600",
                 fontSize: "0.85rem",
                 display: "flex",
                 alignItems: "center",
                 gap: "6px",
+                boxShadow: orderDirty ? "0 0 12px rgba(255, 193, 7, 0.4)" : "none",
               }}
             >
               {orderSaving ? (
                 "Saving Order..."
               ) : orderSaved ? (
                 <><AiOutlineCheck /> Order Saved!</>
+              ) : orderDirty ? (
+                <><AiOutlineSave /> Save Order (Unsaved Changes)</>
               ) : (
                 <><AiOutlineSave /> Save Order ({repos.length})</>
               )}
@@ -455,44 +517,63 @@ function AdminDashboard() {
         {loading ? (
           <p style={{ color: "gray", textAlign: "center" }}>Loading repositories...</p>
         ) : (
-          <DragDropContext onDragEnd={onDragEnd}>
-            <Droppable droppableId="repos">
-              {(provided) => (
-                <div {...provided.droppableProps} ref={provided.innerRef}>
-                  {repos.map((repo, index) => {
-                    const isExpanded = !!expandedRepos[repo.repo_name];
-                    const isDirty = !!dirtyState[repo.repo_name];
-                    return (
-                      <Draggable
-                        key={repo.repo_name}
-                        draggableId={repo.repo_name}
-                        index={index}
+          <div style={{ display: "grid", gap: "10px" }}>
+            {repos.map((repo, index) => {
+              const isExpanded = !!expandedRepos[repo.repo_name];
+              const isDirty = !!dirtyState[repo.repo_name];
+              const isBeingDragged = draggedIndex === index;
+              const isDragTarget = dragOverIndex === index;
+
+              return (
+                <div
+                  key={repo.repo_name}
+                  draggable={true}
+                  onDragStart={(e) => handleDragStart(e, index)}
+                  onDragOver={(e) => handleDragOver(e, index)}
+                  onDrop={(e) => handleDrop(e, index)}
+                  onDragEnd={handleDragEnd}
+                  style={{
+                    ...cardStyle,
+                    borderColor: isDragTarget
+                      ? "#c084f5"
+                      : isDirty
+                      ? "rgba(255, 193, 7, 0.4)"
+                      : "rgba(192, 132, 245, 0.2)",
+                    boxShadow: isDragTarget
+                      ? "0 0 16px rgba(192, 132, 245, 0.4)"
+                      : "none",
+                    opacity: isBeingDragged ? 0.35 : repo.is_visible ? 1 : 0.55,
+                    transform: isDragTarget ? "scale(1.005)" : "none",
+                    transition: "transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease",
+                  }}
+                >
+                  {/* ── Accordion Header ── */}
+                  <div style={headerStyle(isExpanded, isDirty)}>
+                    {/* Drag handle & Priority Badge */}
+                    <div className="d-flex align-items-center gap-2" style={{ flexShrink: 0 }}>
+                      <span
+                        style={{ cursor: "grab", color: "white", padding: "2px 4px", display: "flex", alignItems: "center" }}
+                        title="Drag to reorder"
                       >
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            style={{
-                              ...provided.draggableProps.style,
-                              ...cardStyle,
-                              borderColor: snapshot.isDragging
-                                ? "#c084f5"
-                                : isDirty
-                                ? "rgba(255, 193, 7, 0.4)"
-                                : "rgba(192, 132, 245, 0.2)",
-                              opacity: repo.is_visible ? 1 : 0.55,
-                            }}
-                          >
-                            {/* ── Accordion Header ── */}
-                            <div style={headerStyle(isExpanded, isDirty)}>
-                              {/* 3x2 dot drag handle */}
-                              <span
-                                {...provided.dragHandleProps}
-                                style={{ cursor: "grab", color: "white", flexShrink: 0 }}
-                                title="Drag to reorder"
-                              >
-                                <DragHandleIcon />
-                              </span>
+                        <DragHandleIcon />
+                      </span>
+
+                      <span
+                        style={{
+                          fontSize: "0.75rem",
+                          fontWeight: "700",
+                          color: repo.is_visible ? "#c084f5" : "rgba(255,255,255,0.4)",
+                          background: "rgba(255,255,255,0.06)",
+                          borderRadius: "4px",
+                          padding: "2px 6px",
+                          minWidth: "28px",
+                          textAlign: "center",
+                        }}
+                        title={`Showcase Priority #${index + 1}`}
+                      >
+                        #{index + 1}
+                      </span>
+                    </div>
 
                               {/* Expand caret */}
                               <span
@@ -685,15 +766,9 @@ function AdminDashboard() {
                               </div>
                             </Collapse>
                           </div>
-                        )}
-                      </Draggable>
                     );
                   })}
-                  {provided.placeholder}
                 </div>
-              )}
-            </Droppable>
-          </DragDropContext>
         )}
       </Container>
     </div>

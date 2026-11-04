@@ -24,16 +24,31 @@ export default async function handler(req, res) {
 
       const body = req.body;
 
-      // Batch update (e.g. priorities after drag-and-drop)
+      // Batch update (e.g. priorities after drag-and-drop or Save Order)
       if (Array.isArray(body)) {
         await Promise.all(
           body.map((item) => {
             if (!item.repo_name) return null;
             return sql`
-              INSERT INTO portfolio_projects (repo_name, display_title, priority, updated_at)
-              VALUES (${item.repo_name}, ${item.display_title || item.repo_name}, ${item.priority ?? 0}, NOW())
+              INSERT INTO portfolio_projects (
+                repo_name, 
+                display_title, 
+                priority, 
+                is_visible,
+                updated_at
+              )
+              VALUES (
+                ${item.repo_name}, 
+                ${item.display_title || item.repo_name}, 
+                ${item.priority ?? 0}, 
+                ${item.is_visible !== undefined ? item.is_visible : null},
+                NOW()
+              )
               ON CONFLICT (repo_name) DO UPDATE 
-              SET priority = EXCLUDED.priority, updated_at = NOW()
+              SET 
+                priority = EXCLUDED.priority, 
+                is_visible = COALESCE(EXCLUDED.is_visible, portfolio_projects.is_visible),
+                updated_at = NOW()
             `;
           })
         );
