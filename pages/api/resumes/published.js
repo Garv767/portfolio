@@ -20,10 +20,16 @@ export default async function handler(req, res) {
       return res.json({ hasPublished: false, resume: null });
     }
 
+    const pub = rows[0];
+    const safeTitle = (pub.title || "resume")
+      .replace(/\.tex$/i, "")
+      .replace(/[^a-zA-Z0-9_\-]/g, "_");
+
     return res.json({
       hasPublished: true,
-      resume: rows[0],
+      resume: pub,
       pdfUrl: "/api/resumes/published-pdf",
+      publicUrl: `/resumes/${safeTitle}.pdf`,
     });
   } catch (err) {
     console.error("Get published resume error:", err);

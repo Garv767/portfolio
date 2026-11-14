@@ -22,6 +22,14 @@ const nextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      {
+        source: "/resumes/:filename*",
+        destination: "/api/resumes/render-pdf?filename=:filename*",
+      },
+    ];
+  },
   webpack: (config) => {
     config.module.rules.push({
       test: /\.(pdf)$/i,
