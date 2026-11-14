@@ -137,7 +137,6 @@ export default async function handler(req, res) {
         available_resumes: resumes.map((r) => ({
           title: r.title,
           url: `/resumes/${r.title.replace(/\.tex$/i, "").replace(/\s+/g, "_")}.pdf`,
-          is_published: r.is_published,
         })),
       });
     }

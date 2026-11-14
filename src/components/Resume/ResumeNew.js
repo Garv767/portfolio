@@ -9,18 +9,22 @@ if (typeof window !== "undefined") {
   pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 }
 
-function ResumeNew() {
+function ResumeNew({ customPdfUrl, customTitle, downloadName }) {
   const [width, setWidth] = useState(1200);
-  const [pdfUrl, setPdfUrl] = useState("/api/resumes/published-pdf");
+  const [pdfUrl, setPdfUrl] = useState(customPdfUrl || "/api/resumes/published-pdf");
   const [numPages, setNumPages] = useState(null);
   const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       setWidth(window.innerWidth);
-      setPdfUrl(`/api/resumes/published-pdf?v=${Date.now()}`);
+      if (customPdfUrl) {
+        setPdfUrl(customPdfUrl);
+      } else {
+        setPdfUrl(`/api/resumes/published-pdf?v=${Date.now()}`);
+      }
     }
-  }, []);
+  }, [customPdfUrl]);
 
   const handleDocumentLoadSuccess = ({ numPages }) => {
     setNumPages(numPages);
@@ -28,7 +32,7 @@ function ResumeNew() {
   };
 
   const handleDocumentLoadError = (err) => {
-    console.error("Failed to load dynamic PDF from /api/resumes/published-pdf:", err);
+    console.error("Failed to load dynamic PDF from " + pdfUrl, err);
     setLoadError(true);
   };
 
@@ -36,12 +40,19 @@ function ResumeNew() {
     <div>
       <Container fluid className="resume-section">
         <Particle />
+        {customTitle && (
+          <Row style={{ justifyContent: "center", position: "relative", marginBottom: "15px" }}>
+            <h2 className="project-heading" style={{ textAlign: "center" }}>
+              {customTitle}
+            </h2>
+          </Row>
+        )}
         <Row style={{ justifyContent: "center", position: "relative" }}>
           <Button
             variant="primary"
             href={pdfUrl}
             target="_blank"
-            download="Garv_Rahut_Resume.pdf"
+            download={downloadName || "Garv_Rahut_Resume.pdf"}
             style={{ maxWidth: "250px" }}
           >
             <AiOutlineDownload />
@@ -77,7 +88,7 @@ function ResumeNew() {
             variant="primary"
             href={pdfUrl}
             target="_blank"
-            download="Garv_Rahut_Resume.pdf"
+            download={downloadName || "Garv_Rahut_Resume.pdf"}
             style={{ maxWidth: "250px" }}
           >
             <AiOutlineDownload />
